@@ -9,8 +9,6 @@ kaboom();
 // load assets
 loadSprite("bean", "sprites/bean.png");
 loadPedit("pentagon", "sprites/Pentagon.pedit");
-
-scene("game", () => {
 //         loadSprite("bean", "sprites/bean.png");
 //         loadPedit("beanl", "sprites/beanl.pedit");
 //         loadPedit("ghosty", "sprites/ghosty.pedit");
@@ -168,6 +166,10 @@ scene("game", () => {
 //             ],
 //         }
 
+
+scene("game", () => {
+
+
   
 	// define gravity
 	gravity(2400);
@@ -243,7 +245,7 @@ scene("game", () => {
 
 	// start spawning trees
 	spawnTree();
-  wait(20, SPEED = SPEED + 10);
+  // wait(20, SPEED = SPEED + 10);
 	// lose if player collides with any game obj with tag "tree"
 	player.onCollide("tree", () => {
 		// go to "lose" scene and pass the score
@@ -271,7 +273,7 @@ scene("game", () => {
 scene("lose", (score) => {
 
 	add([
-		sprite("bean"),
+		sprite("pentagon"),
 		pos(width() / 2, height() / 2 - 80),
 		scale(2),
 		origin("center"),

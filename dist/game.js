@@ -2969,7 +2969,6 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     }
     __name(spawnTree, "spawnTree");
     spawnTree();
-    wait(20, SPEED = SPEED + 10);
     player.onCollide("tree", () => {
       go("lose", score);
       burp();
@@ -2987,7 +2986,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   });
   scene("lose", (score) => {
     add([
-      sprite("bean"),
+      sprite("pentagon"),
       pos(width() / 2, height() / 2 - 80),
       scale(2),
       origin("center")
