@@ -10,7 +10,7 @@ kaboom();
 loadSprite("bean", "sprites/bean.png");
 loadPedit("pentagon", "sprites/Pentagon.pedit");
 
-// scene("game", () => {
+scene("game", () => {
 //         loadSprite("bean", "sprites/bean.png");
 //         loadPedit("beanl", "sprites/beanl.pedit");
 //         loadPedit("ghosty", "sprites/ghosty.pedit");
