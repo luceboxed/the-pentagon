@@ -6,8 +6,15 @@ let highscore = 0;
 let attempts = 0;
 
 // initialize context
-kaboom();
+kaboom({
+  global: true,
+  fullscreen: true,
+  scale: 1,
+  debug: true,
+  clearColor: [0.75, 0.55, 0.35, 3],});
 
+function startGame()
+{
 // load assets
 loadSprite("bean", "sprites/bean.png");
 loadPedit("pentagon", "sprites/Pentagon.pedit");
@@ -225,6 +232,19 @@ scene("game", () => {
 	onKeyPress("space", jump);
 	onClick(jump);
 
+  //left wall barrier
+add([
+			rect(48, 200),
+			area(),
+      solid(),
+			outline(4),
+			pos(-48, height() - FLOOR_HEIGHT),
+			origin("botleft"),
+			color(255, 180, 255),
+			//move(LEFT, SPEED*0.5),
+			"wall",
+		]);
+  
 	function spawnTree() {
 
 		// add tree obj
@@ -310,3 +330,5 @@ scene("lose", (score) => {
 });
 
 go("game");
+}
+startGame()

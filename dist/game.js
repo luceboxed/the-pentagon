@@ -2917,106 +2917,126 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   var JUMP_FORCE = 800;
   var highscore = 0;
   var attempts = 0;
-  no();
-  loadSprite("bean", "sprites/bean.png");
-  loadPedit("pentagon", "sprites/Pentagon.pedit");
-  scene("game", () => {
-    gravity(2400);
-    let SPEED = 400;
-    const player = add([
-      sprite("pentagon"),
-      pos(80, 40),
-      area(),
-      body()
-    ]);
-    add([
-      rect(width(), FLOOR_HEIGHT),
-      outline(4),
-      pos(0, height()),
-      origin("botleft"),
-      area(),
-      solid(),
-      color(127, 200, 255)
-    ]);
-    function walkLeft() {
-      player.move(-500, 0);
-    }
-    __name(walkLeft, "walkLeft");
-    onKeyDown("left", walkLeft);
-    function walkRight() {
-      player.move(500, 0);
-    }
-    __name(walkRight, "walkRight");
-    onKeyDown("right", walkRight);
-    function jump() {
-      if (player.grounded()) {
-        player.jump(JUMP_FORCE);
-      }
-    }
-    __name(jump, "jump");
-    onKeyPress("space", jump);
-    onClick(jump);
-    function spawnTree() {
-      add([
-        rect(48, rand(32, 96)),
+  no({
+    global: true,
+    fullscreen: true,
+    scale: 1,
+    debug: true,
+    clearColor: [0.75, 0.55, 0.35, 3]
+  });
+  function startGame() {
+    loadSprite("bean", "sprites/bean.png");
+    loadPedit("pentagon", "sprites/Pentagon.pedit");
+    scene("game", () => {
+      gravity(2400);
+      let SPEED = 400;
+      const player = add([
+        sprite("pentagon"),
+        pos(80, 40),
         area(),
+        body()
+      ]);
+      add([
+        rect(width(), FLOOR_HEIGHT),
         outline(4),
-        pos(width(), height() - FLOOR_HEIGHT),
+        pos(0, height()),
+        origin("botleft"),
+        area(),
+        solid(),
+        color(127, 200, 255)
+      ]);
+      function walkLeft() {
+        player.move(-500, 0);
+      }
+      __name(walkLeft, "walkLeft");
+      onKeyDown("left", walkLeft);
+      function walkRight() {
+        player.move(500, 0);
+      }
+      __name(walkRight, "walkRight");
+      onKeyDown("right", walkRight);
+      function jump() {
+        if (player.grounded()) {
+          player.jump(JUMP_FORCE);
+        }
+      }
+      __name(jump, "jump");
+      onKeyPress("space", jump);
+      onClick(jump);
+      add([
+        rect(48, 200),
+        area(),
+        solid(),
+        outline(4),
+        pos(-48, height() - FLOOR_HEIGHT),
         origin("botleft"),
         color(255, 180, 255),
-        move(LEFT, SPEED * 0.5),
-        "tree"
+        "wall"
       ]);
-      wait(rand(0.8, 1.3), spawnTree);
-    }
-    __name(spawnTree, "spawnTree");
-    spawnTree();
-    player.onCollide("tree", () => {
-      go("lose", score);
-      burp();
-      addKaboom(player.pos);
-    });
-    let score = 0;
-    const scoreLabel = add([
-      text(score),
-      pos(100, 24)
-    ]);
-    const highscoreLabel = add([
-      text(highscore),
-      pos(300, 24)
-    ]);
-    const attemptLabel = add([
-      text(attempts),
-      pos(500, 24)
-    ]);
-    attempts = attempts + 1;
-    attemptLabel.text = attempts;
-    onUpdate(() => {
-      score++;
-      scoreLabel.text = score;
-      SPEED++;
-      if (score > highscore) {
-        highscore = score;
-        highscoreLabel.text = highscore;
+      function spawnTree() {
+        add([
+          rect(48, rand(32, 96)),
+          area(),
+          outline(4),
+          pos(width(), height() - FLOOR_HEIGHT),
+          origin("botleft"),
+          color(255, 180, 255),
+          move(LEFT, SPEED * 0.5),
+          "tree"
+        ]);
+        wait(rand(0.8, 1.3), spawnTree);
       }
+      __name(spawnTree, "spawnTree");
+      spawnTree();
+      player.onCollide("tree", () => {
+        go("lose", score);
+        burp();
+        addKaboom(player.pos);
+      });
+      let score = 0;
+      const scoreLabel = add([
+        text(score),
+        pos(100, 24)
+      ]);
+      const highscoreLabel = add([
+        text(highscore),
+        pos(300, 24)
+      ]);
+      const attemptLabel = add([
+        text(attempts),
+        pos(500, 24)
+      ]);
+      attempts = attempts + 1;
+      attemptLabel.text = attempts;
+      onUpdate(() => {
+        score++;
+        scoreLabel.text = score;
+        SPEED++;
+        if (score > highscore) {
+          highscore = score;
+          highscoreLabel.text = highscore;
+        }
+      });
     });
-  });
-  scene("lose", (score) => {
-    add([
-      sprite("pentagon"),
-      pos(width() / 2, height() / 2 - 80),
-      scale(2),
-      origin("center")
-    ]);
-    add([
-      text(score),
-      pos(width() / 2, height() / 2 + 80),
-      scale(2),
-      origin("center")
-    ]);
-    onKeyPress("space", () => go("game"));
-    onClick(() => go("game"));
-  });
-  go("game");
+    scene("lose", (score) => {
+      add([
+        sprite("pentagon"),
+        pos(width() / 2, height() / 2 - 80),
+        scale(2),
+        origin("center")
+      ]);
+      add([
+        text(score),
+        pos(width() / 2, height() / 2 + 80),
+        scale(2),
+        origin("center")
+      ]);
+      onKeyPress("space", () => go("game"));
+      onClick(() => go("game"));
+    });
+    go("game");
+  }
+  __name(startGame, "startGame");
+  startGame();
 })();
 //# sourceMappingURL=game.js.map
