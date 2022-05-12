@@ -4,7 +4,6 @@ const FLOOR_HEIGHT = 48;
 const JUMP_FORCE = 800;
 let highscore = 0;
 let attempts = 0;
-
 // initialize context
 kaboom({
   global: true,
@@ -13,12 +12,13 @@ kaboom({
   debug: true,
   clearColor: [0, 0, 0, 1],
 });
-
+loadSprite("shop", "sprites/shop.jpg");
 function startGame()
 {
 // load assets
 loadSprite("bean", "sprites/bean.png");
 loadPedit("pentagon", "sprites/Pentagon.pedit");
+loadSprite("shop", "sprites/shop.jpg");
 //         loadSprite("bean", "sprites/bean.png");
 //         loadPedit("beanl", "sprites/beanl.pedit");
 //         loadPedit("ghosty", "sprites/ghosty.pedit");
@@ -363,7 +363,13 @@ scene("menu", () => {
 	// 		b.clickAction();
 	// 	}
 	// });
+  add([
+		// list of components
+	  sprite("shop"),
+		pos(80, 70),
+    scale(.3),
+	]);
 });
 
-//startGame()
-go("menu")
+startGame()
+//go("menu")
