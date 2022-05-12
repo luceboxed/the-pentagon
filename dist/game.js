@@ -2915,7 +2915,6 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   // code/main.js
   var FLOOR_HEIGHT = 48;
   var JUMP_FORCE = 800;
-  var SPEED = 450;
   var highscore = 0;
   var attempts = 0;
   no();
@@ -2923,6 +2922,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadPedit("pentagon", "sprites/Pentagon.pedit");
   scene("game", () => {
     gravity(2400);
+    let SPEED = 400;
     const player = add([
       sprite("pentagon"),
       pos(80, 40),
@@ -2967,7 +2967,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         move(LEFT, SPEED * 0.5),
         "tree"
       ]);
-      wait(rand(0.8, 1.5), spawnTree);
+      wait(rand(0.8, 1.3), spawnTree);
     }
     __name(spawnTree, "spawnTree");
     spawnTree();
@@ -2994,6 +2994,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     onUpdate(() => {
       score++;
       scoreLabel.text = score;
+      SPEED++;
       if (score > highscore) {
         highscore = score;
         highscoreLabel.text = highscore;

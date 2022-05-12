@@ -2,7 +2,6 @@ import kaboom from "kaboom";
 
 const FLOOR_HEIGHT = 48;
 const JUMP_FORCE = 800;
-let SPEED = 450;
 let highscore = 0;
 let attempts = 0;
 
@@ -176,6 +175,7 @@ scene("game", () => {
   
 	// define gravity
 	gravity(2400);
+  let SPEED = 400
 
 	// add a game object to screen
 	const player = add([
@@ -240,8 +240,7 @@ scene("game", () => {
 		]);
 
 		// wait a random amount of time to spawn next tree
-		wait(rand(0.8, 1.5), spawnTree);
-    
+		wait(rand(0.8, 1.3), spawnTree);
     
 
 	}
@@ -278,6 +277,7 @@ scene("game", () => {
 	onUpdate(() => {
 		score++;
 		scoreLabel.text = score;
+    SPEED++;
     if (score > highscore) {
       highscore = score;
       highscoreLabel.text = highscore;
