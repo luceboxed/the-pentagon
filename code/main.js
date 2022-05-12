@@ -3,6 +3,9 @@ import kaboom from "kaboom";
 const FLOOR_HEIGHT = 48;
 const JUMP_FORCE = 800;
 let SPEED = 450;
+let highscore = 0;
+let attempts = 0;
+
 // initialize context
 kaboom();
 
@@ -256,16 +259,29 @@ scene("game", () => {
 
 	// keep track of score
 	let score = 0;
-
 	const scoreLabel = add([
 		text(score),
-		pos(24, 24),
+		pos(100, 24),
 	]);
-
+  const highscoreLabel = add([
+    text(highscore),
+    pos(300, 24),
+  ])
+  const attemptLabel = add([
+    text(attempts),
+    pos(500, 24),
+  ])
 	// increment score every frame
+    
+  attempts = attempts + 1;
+  attemptLabel.text = attempts;
 	onUpdate(() => {
 		score++;
 		scoreLabel.text = score;
+    if (score > highscore) {
+      highscore = score;
+      highscoreLabel.text = highscore;
+    }
 	});
 
 });

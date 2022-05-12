@@ -2916,6 +2916,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   var FLOOR_HEIGHT = 48;
   var JUMP_FORCE = 800;
   var SPEED = 450;
+  var highscore = 0;
+  var attempts = 0;
   no();
   loadSprite("bean", "sprites/bean.png");
   loadPedit("pentagon", "sprites/Pentagon.pedit");
@@ -2977,11 +2979,25 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     let score = 0;
     const scoreLabel = add([
       text(score),
-      pos(24, 24)
+      pos(100, 24)
     ]);
+    const highscoreLabel = add([
+      text(highscore),
+      pos(300, 24)
+    ]);
+    const attemptLabel = add([
+      text(attempts),
+      pos(500, 24)
+    ]);
+    attempts = attempts + 1;
+    attemptLabel.text = attempts;
     onUpdate(() => {
       score++;
       scoreLabel.text = score;
+      if (score > highscore) {
+        highscore = score;
+        highscoreLabel.text = highscore;
+      }
     });
   });
   scene("lose", (score) => {
