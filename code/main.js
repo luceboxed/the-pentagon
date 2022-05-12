@@ -11,7 +11,8 @@ kaboom({
   fullscreen: true,
   scale: 1,
   debug: true,
-  clearColor: [0.75, 0.55, 0.35, 3],});
+  clearColor: [0, 0, 0, 1],
+});
 
 function startGame()
 {
@@ -331,4 +332,38 @@ scene("lose", (score) => {
 
 go("game");
 }
-startGame()
+
+
+
+
+//scene("menu", () => {});
+scene("menu", () => {
+	add([
+		text("Menu"), origin('center'),
+		pos(width()/2, 60),
+		scale(1),
+	]);
+  add([
+		rect(255, 40),origin('center'),
+		pos(width()/2, 240),
+    color(0,0,0,1),
+		// "button",
+		// {
+		// 	clickAction: () => window.open('https://kaboomjs.com/', '_blank'),
+		//},
+  ]);
+	// action("button", b => {
+
+	// 	if (b.isHovered()) {
+	// 		b.use(color(0.7, 0.7, 0.7));
+	// 	} else {
+	// 		b.use(color(255, 0, 0));
+	// 	}
+	// 	if (b.isClicked()) {
+	// 		b.clickAction();
+	// 	}
+	// });
+});
+
+//startGame()
+go("menu")
