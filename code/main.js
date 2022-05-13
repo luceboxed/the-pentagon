@@ -6,13 +6,21 @@ let highscore = 0;
 let attempts = 0;
 // initialize context
 kaboom({
-  global: true,
-  fullscreen: true,
-  scale: 1,
-  debug: true,
-  clearColor: [0, 0, 0, 1],
+  // global: true,
+  // fullscreen: true,
+  // scale: 1,
+  // debug: true,
+  // clearColor: [0, 0, 0, 1],
+  background: [134, 135, 247],
+  // width: 1280,
+  // height: 960,
+  // scale: 1,
 });
 loadSprite("shop", "sprites/shop.jpg");
+loadPedit("pentagon", "sprites/Pentagon.pedit");
+loadPedit("andrew", "sprites/andrew.pedit");
+loadPedit("cloud", "sprites/cloud.pedit");
+loadSprite("sky","https://www.paulwheeler.us/files/windows-95-desktop-background.jpg");
 function startGame()
 {
 // load assets
@@ -23,7 +31,7 @@ loadSprite("shop", "sprites/shop.jpg");
 //         loadPedit("beanl", "sprites/beanl.pedit");
 //         loadPedit("ghosty", "sprites/ghosty.pedit");
 //         loadPedit("spike", "sprites/spike.pedit");
-//         loadPedit("cloud", "sprites/cloud.pedit");
+         loadPedit("cloud", "sprites/cloud.pedit");
 //         loadPedit("rock", "sprites/rock.pedit");
 //         loadPedit("box", "sprites/box.pedit");
 //         loadPedit("monster", "sprites/monster.pedit");
@@ -36,7 +44,7 @@ loadSprite("shop", "sprites/shop.jpg");
 //         loadPedit("portal", "sprites/portal.pedit");
 //         loadPedit("portal2", "sprites/portal2.pedit");
 //         loadPedit("coin", "sprites/coin.pedit");
-//         loadPedit("andrew", "sprites/andrew.pedit");
+//loadPedit("andrew", "sprites/andrew.pedit");
 //         loadPedit("bottle", "sprites/bottle.pedit");
 //   const LEVELS = [
 //             [ //0
@@ -181,9 +189,43 @@ scene("game", () => {
 
 
   
+layers([
+    "background",
+  "midground",
+    "game"
+], "game");
+
+add([
+    sprite("sky"),
+    layer("background")
+]);
+
+//   async function init() {
+//   let bgImage = await loadSprite("background", "https://www.paulwheeler.us/files/windows-95-desktop-background.jpg");
+
+//   let background = add([
+//     sprite("background"),
+//     // Make the background centered on the screen
+//     pos(width() / 2, height() / 2),
+//     origin("center"),
+//     // Allow the background to be scaled
+//     scale(1),
+//     // Keep the background position fixed even when the camera moves
+//     fixed()
+//   ]);
+//   // Scale the background to cover the screen
+//   background.scaleTo(Math.max(
+//     width() / bgImage.tex.width,
+//     height() / bgImage.tex.height
+//   ));
+// }
+
+// init();
+
+  
 	// define gravity
 	gravity(2400);
-  let SPEED = 400
+  let SPEED = 1000
 
 	// add a game object to screen
 	const player = add([
@@ -224,24 +266,31 @@ scene("game", () => {
   
   
 	function jump() {
-		if (player.grounded()) {
+		if (player.isGrounded()) {
 			player.jump(JUMP_FORCE);
 		}
 	}
 
+  function fall() {
+    if (player.isFalling) {
+      player.jump(JUMP_FORCE * -2);
+    }
+  }
+
+  onKeyPress("down", fall);
 	// jump when user press space
 	onKeyPress("space", jump);
 	onClick(jump);
 
   //left wall barrier
 add([
-			rect(48, 200),
+			rect(48, 2000),
 			area(),
       solid(),
 			outline(4),
 			pos(-48, height() - FLOOR_HEIGHT),
 			origin("botleft"),
-			color(255, 180, 255),
+			color(131, 106, 36),
 			//move(LEFT, SPEED*0.5),
 			"wall",
 		]);
@@ -255,8 +304,8 @@ add([
 			outline(4),
 			pos(width(), height() - FLOOR_HEIGHT),
 			origin("botleft"),
-			color(255, 180, 255),
-			move(LEFT, SPEED*0.5),
+			color(131, 106, 36),
+			move(LEFT, SPEED*0.2),
 			"tree",
 		]);
 
@@ -266,8 +315,32 @@ add([
 
 	}
 
+  function spawnClouds() {
+
+		// add tree obj
+		const BB = add([
+			sprite("cloud"),
+      layer("midground"),
+			area(),
+      scale(rand(.5, 2)),
+			//outline(4),
+			pos(width(), rand(height() - FLOOR_HEIGHT, 0)),
+			origin("botleft"),
+			//color(131, 0, 0),
+			move(LEFT, SPEED*0.2*rand(.5,1.5)),
+			"andrew",
+		]);
+
+		// wait a random amount of time to spawn next tree
+		wait(rand(0, 2), spawnClouds);
+    
+
+	}
+
+  
 	// start spawning trees
 	spawnTree();
+  spawnClouds();
   // wait(20, SPEED = SPEED + 10);
 	// lose if player collides with any game obj with tag "tree"
 	player.onCollide("tree", () => {
@@ -283,13 +356,29 @@ add([
 		text(score),
 		pos(100, 24),
 	]);
+  add([
+    text("Score"),
+    pos(100, 4),
+    scale(.5)
+  ])
   const highscoreLabel = add([
     text(highscore),
     pos(300, 24),
+    color(0, 0, 0)
+  ])
+  add([
+    text("Record"),
+    pos(300, 4),
+    scale(.5)
   ])
   const attemptLabel = add([
     text(attempts),
     pos(500, 24),
+  ])
+  add([
+    text("Attempt"),
+    pos(500, 4),
+    scale(.5)
   ])
 	// increment score every frame
     
@@ -302,6 +391,7 @@ add([
     if (score > highscore) {
       highscore = score;
       highscoreLabel.text = highscore;
+      highscoreLabel.color = rgb(255, 196, 0)
     }
 	});
 
@@ -311,22 +401,39 @@ scene("lose", (score) => {
 
 	add([
 		sprite("pentagon"),
-		pos(width() / 2, height() / 2 - 80),
+		pos(width() / 2, height() / 2 + 150),
 		scale(2),
 		origin("center"),
 	]);
-
 	// display score
-	add([
+	const finalscoreLabel = add([
 		text(score),
 		pos(width() / 2, height() / 2 + 80),
 		scale(2),
 		origin("center"),
+    color(255,255,255)
 	]);
+  if (score >= highscore) {
+      add([
+        text("New record!"),
+        pos(width() / 2, heght() / 2 + 40),
+        scale(1),
+        origin("center"),
+        finalscoreLabel.color = rbg(255, 196, 0),
+      ]);
+    }
+  add([
+    text("Click to play again\nScore"),
+    pos(width() / 2, height() / 2 - 100),
+    scale(.7),
+    origin("center")
+  ])
 
 	// go back to game with space is pressed
 	onKeyPress("space", () => go("game"));
 	onClick(() => go("game"));
+  onKeyPress("s", () => go("shop"));
+
 
 });
 
@@ -336,40 +443,35 @@ go("game");
 
 
 
-//scene("menu", () => {});
+scene("shop", () => {});
+
+
 scene("menu", () => {
 	add([
-		text("Menu"), origin('center'),
-		pos(width()/2, 60),
+		text("THE PENTAGON"), origin('center'),
+		pos(width()/2, height() /2 - 150),
+		scale(1.5),
+    color(255, 0, 0)
+	]);
+  add([
+		text("Click or press SPACE to start!"), origin('center'),
+		pos(width()/2, height() /2 - 100),
 		scale(1),
+    color(0, 255, 0)
 	]);
-  add([
-		rect(255, 40),origin('center'),
-		pos(width()/2, 240),
-    color(0,0,0,1),
-		// "button",
-		// {
-		// 	clickAction: () => window.open('https://kaboomjs.com/', '_blank'),
-		//},
+  add([text("AVOID obstacles!\nPress SPACE/CLICK to JUMP!\nPress ARROW KEYS to MOVE!\nPress DOWN ARROW while in the air to FAST FALL!\nBest played maximized."), origin('center'),
+		pos(width()/2, height() /2 + 30),
+		scale(.5),
+    color(0, 255, 0)
   ]);
-	// action("button", b => {
-
-	// 	if (b.isHovered()) {
-	// 		b.use(color(0.7, 0.7, 0.7));
-	// 	} else {
-	// 		b.use(color(255, 0, 0));
-	// 	}
-	// 	if (b.isClicked()) {
-	// 		b.clickAction();
-	// 	}
-	// });
   add([
-		// list of components
-	  sprite("shop"),
-		pos(80, 70),
-    scale(.3),
-	]);
+    sprite("pentagon"),
+		pos(width() / 2, height() / 2 + 150),
+		scale(2),
+		origin("center"),
+  ])
+  onKeyPress("space", () => startGame());
+  onClick(() => startGame());
 });
 
-startGame()
-//go("menu")
+go("menu")

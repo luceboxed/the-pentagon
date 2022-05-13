@@ -2918,20 +2918,30 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   var highscore = 0;
   var attempts = 0;
   no({
-    global: true,
-    fullscreen: true,
-    scale: 1,
-    debug: true,
-    clearColor: [0, 0, 0, 1]
+    background: [134, 135, 247]
   });
   loadSprite("shop", "sprites/shop.jpg");
+  loadPedit("pentagon", "sprites/Pentagon.pedit");
+  loadPedit("andrew", "sprites/andrew.pedit");
+  loadPedit("cloud", "sprites/cloud.pedit");
+  loadSprite("sky", "https://www.paulwheeler.us/files/windows-95-desktop-background.jpg");
   function startGame() {
     loadSprite("bean", "sprites/bean.png");
     loadPedit("pentagon", "sprites/Pentagon.pedit");
     loadSprite("shop", "sprites/shop.jpg");
+    loadPedit("cloud", "sprites/cloud.pedit");
     scene("game", () => {
+      layers([
+        "background",
+        "midground",
+        "game"
+      ], "game");
+      add([
+        sprite("sky"),
+        layer("background")
+      ]);
       gravity(2400);
-      let SPEED = 400;
+      let SPEED = 1e3;
       const player = add([
         sprite("pentagon"),
         pos(80, 40),
@@ -2958,21 +2968,28 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       __name(walkRight, "walkRight");
       onKeyDown("right", walkRight);
       function jump() {
-        if (player.grounded()) {
+        if (player.isGrounded()) {
           player.jump(JUMP_FORCE);
         }
       }
       __name(jump, "jump");
+      function fall() {
+        if (player.isFalling) {
+          player.jump(JUMP_FORCE * -2);
+        }
+      }
+      __name(fall, "fall");
+      onKeyPress("down", fall);
       onKeyPress("space", jump);
       onClick(jump);
       add([
-        rect(48, 200),
+        rect(48, 2e3),
         area(),
         solid(),
         outline(4),
         pos(-48, height() - FLOOR_HEIGHT),
         origin("botleft"),
-        color(255, 180, 255),
+        color(131, 106, 36),
         "wall"
       ]);
       function spawnTree() {
@@ -2982,14 +2999,29 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           outline(4),
           pos(width(), height() - FLOOR_HEIGHT),
           origin("botleft"),
-          color(255, 180, 255),
-          move(LEFT, SPEED * 0.5),
+          color(131, 106, 36),
+          move(LEFT, SPEED * 0.2),
           "tree"
         ]);
         wait(rand(0.8, 1.3), spawnTree);
       }
       __name(spawnTree, "spawnTree");
+      function spawnClouds() {
+        const BB = add([
+          sprite("cloud"),
+          layer("midground"),
+          area(),
+          scale(rand(0.5, 2)),
+          pos(width(), rand(height() - FLOOR_HEIGHT, 0)),
+          origin("botleft"),
+          move(LEFT, SPEED * 0.2 * rand(0.5, 1.5)),
+          "andrew"
+        ]);
+        wait(rand(0, 2), spawnClouds);
+      }
+      __name(spawnClouds, "spawnClouds");
       spawnTree();
+      spawnClouds();
       player.onCollide("tree", () => {
         go("lose", score);
         burp();
@@ -3000,13 +3032,29 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         text(score),
         pos(100, 24)
       ]);
+      add([
+        text("Score"),
+        pos(100, 4),
+        scale(0.5)
+      ]);
       const highscoreLabel = add([
         text(highscore),
-        pos(300, 24)
+        pos(300, 24),
+        color(0, 0, 0)
+      ]);
+      add([
+        text("Record"),
+        pos(300, 4),
+        scale(0.5)
       ]);
       const attemptLabel = add([
         text(attempts),
         pos(500, 24)
+      ]);
+      add([
+        text("Attempt"),
+        pos(500, 4),
+        scale(0.5)
       ]);
       attempts = attempts + 1;
       attemptLabel.text = attempts;
@@ -3017,47 +3065,79 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         if (score > highscore) {
           highscore = score;
           highscoreLabel.text = highscore;
+          highscoreLabel.color = rgb(255, 196, 0);
         }
       });
     });
     scene("lose", (score) => {
       add([
         sprite("pentagon"),
-        pos(width() / 2, height() / 2 - 80),
+        pos(width() / 2, height() / 2 + 150),
         scale(2),
         origin("center")
       ]);
-      add([
+      const finalscoreLabel = add([
         text(score),
         pos(width() / 2, height() / 2 + 80),
         scale(2),
+        origin("center"),
+        color(255, 255, 255)
+      ]);
+      if (score >= highscore) {
+        add([
+          text("New record!"),
+          pos(width() / 2, heght() / 2 + 40),
+          scale(1),
+          origin("center"),
+          finalscoreLabel.color = rbg(255, 196, 0)
+        ]);
+      }
+      add([
+        text("Click to play again\nScore"),
+        pos(width() / 2, height() / 2 - 100),
+        scale(0.7),
         origin("center")
       ]);
       onKeyPress("space", () => go("game"));
       onClick(() => go("game"));
+      onKeyPress("s", () => go("shop"));
     });
     go("game");
   }
   __name(startGame, "startGame");
+  scene("shop", () => {
+  });
   scene("menu", () => {
     add([
-      text("Menu"),
+      text("THE PENTAGON"),
       origin("center"),
-      pos(width() / 2, 60),
-      scale(1)
+      pos(width() / 2, height() / 2 - 150),
+      scale(1.5),
+      color(255, 0, 0)
     ]);
     add([
-      rect(255, 40),
+      text("Click or press SPACE to start!"),
       origin("center"),
-      pos(width() / 2, 240),
-      color(0, 0, 0, 1)
+      pos(width() / 2, height() / 2 - 100),
+      scale(1),
+      color(0, 255, 0)
     ]);
     add([
-      sprite("shop"),
-      pos(80, 70),
-      scale(0.3)
+      text("AVOID obstacles!\nPress SPACE/CLICK to JUMP!\nPress ARROW KEYS to MOVE!\nPress DOWN ARROW while in the air to FAST FALL!\nBest played maximized."),
+      origin("center"),
+      pos(width() / 2, height() / 2 + 30),
+      scale(0.5),
+      color(0, 255, 0)
     ]);
+    add([
+      sprite("pentagon"),
+      pos(width() / 2, height() / 2 + 150),
+      scale(2),
+      origin("center")
+    ]);
+    onKeyPress("space", () => startGame());
+    onClick(() => startGame());
   });
-  startGame();
+  go("menu");
 })();
 //# sourceMappingURL=game.js.map
