@@ -2926,11 +2926,13 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadPedit("cloud", "sprites/cloud.pedit");
   loadSprite("sky", "sprites/windows-95-desktop-background.jpg");
   loadPedit("coin", "sprites/coin.pedit");
+  loadPedit("rock", "sprites/rock.pedit");
   function startGame() {
     loadSprite("bean", "sprites/bean.png");
     loadPedit("pentagon", "sprites/Pentagon.pedit");
     loadSprite("shop", "sprites/shop.jpg");
     loadPedit("cloud", "sprites/cloud.pedit");
+    loadPedit("rock", "sprites/rock.pedit");
     scene("game", () => {
       layers([
         "background",
@@ -3010,9 +3012,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       function spawnClouds() {
         const BB = add([
           sprite("cloud"),
-          layer("midground"),
           area(),
-          scale(rand(0.5, 2)),
+          scale(rand(0.5, 4)),
           pos(width(), rand(height() - FLOOR_HEIGHT - 30, 10)),
           origin("botleft"),
           move(LEFT, SPEED * 0.2 * rand(0.5, 1.5)),
@@ -3030,15 +3031,30 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           outline(4),
           pos(width(), rand(height() - 40, height() - 200)),
           origin("botleft"),
-          move(LEFT, SPEED * 0.2 * rand(0.3, 1.3)),
+          move(LEFT, SPEED * rand(0.1, 0.4)),
           "coin"
         ]);
         wait(rand(10, 30), spawnCoins);
       }
       __name(spawnCoins, "spawnCoins");
+      function spawnRocks() {
+        add([
+          sprite("rock"),
+          area(),
+          scale(1),
+          outline(4),
+          pos(width(), height() - FLOOR_HEIGHT),
+          origin("botleft"),
+          move(LEFT, SPEED * rand(0.1, 0.3)),
+          "tree"
+        ]);
+        wait(rand(20, 60), spawnRocks);
+      }
+      __name(spawnRocks, "spawnRocks");
       spawnTree();
       spawnClouds();
       spawnCoins();
+      wait(rand(60, 85), spawnRocks());
       player.onCollide("tree", () => {
         go("lose", score, highscore);
         addKaboom(player.pos);
@@ -3104,7 +3120,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         origin("center"),
         color(255, 255, 255)
       ]);
-      if (score >= highscore) {
+      if (score == highscore) {
         add([
           text("New record!"),
           pos(width() / 2, height() / 2 + 40),
@@ -3137,7 +3153,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       color(255, 0, 0)
     ]);
     add([
-      text("Click or press SPACE to start!"),
+      text("Press SPACE to start!"),
       origin("center"),
       pos(width() / 2, height() / 2 - 100),
       scale(1),
@@ -3152,12 +3168,96 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     ]);
     add([
       sprite("pentagon"),
+      area(),
       pos(width() / 2, height() / 2 + 150),
       scale(2),
-      origin("center")
+      origin("center"),
+      "olist"
+    ]);
+    add([
+      text("Click the pentagon for the list of obstacles!"),
+      origin("center"),
+      area(),
+      pos(width() / 2, height() / 2 + 200),
+      scale(0.5),
+      color(0, 0, 255),
+      "olist"
     ]);
     onKeyPress("space", () => startGame());
-    onClick(() => startGame());
+    onKeyPress("o", () => go("obstacles"));
+    onClick("olist", (olist) => go("obstacles"));
+  });
+  scene("obstacles", () => {
+    add([
+      text("OBSTACLES"),
+      origin("center"),
+      pos(width() / 2, height() / 2 - 300),
+      scale(1.5),
+      color(255, 0, 0)
+    ]);
+    add([
+      sprite("pentagon"),
+      pos(width() / 5, height() / 2 - 150),
+      scale(1.5),
+      origin("center")
+    ]);
+    add([
+      text("PENTAGON\nIts you!\nThe player character."),
+      origin("center"),
+      pos(width() / 5, height() / 2 - 100),
+      scale(0.3),
+      color(0, 255, 0)
+    ]);
+    add([
+      sprite("coin"),
+      pos(width() / 2.5, height() / 2 - 150),
+      scale(1.5),
+      origin("center")
+    ]);
+    add([
+      text("COIN\nUncommon obstacle.\nGrab it for 200 points!"),
+      origin("center"),
+      pos(width() / 2.5, height() / 2 - 100),
+      scale(0.3),
+      color(0, 255, 0)
+    ]);
+    add([
+      rect(48, 48),
+      origin("center"),
+      outline(4),
+      pos(width() / 1.5, height() / 2 - 150),
+      color(131, 106, 36),
+      "tree"
+    ]);
+    add([
+      text("TREE\nCommon obstacle.\nHitting it results in game over."),
+      origin("center"),
+      pos(width() / 1.5, height() / 2 - 100),
+      scale(0.3),
+      color(255, 0, 0)
+    ]);
+    add([
+      sprite("rock"),
+      origin("center"),
+      outline(4),
+      pos(width() / 5, height() / 2 + 100),
+      "tree"
+    ]);
+    add([
+      text("ROCK\nUncommon obstacle.\nSlower than a tree, hitting it results in game over."),
+      origin("center"),
+      pos(width() / 5, height() / 2 + 150),
+      scale(0.3),
+      color(255, 0, 0)
+    ]);
+    add([
+      text("Click to return to menu."),
+      origin("center"),
+      pos(width() / 2, height() / 2 + 300),
+      scale(1),
+      color(0, 0, 255)
+    ]);
+    onClick(() => go("menu"));
   });
   go("menu");
 })();
