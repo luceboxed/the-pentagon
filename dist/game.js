@@ -2927,6 +2927,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadSprite("sky", "sprites/windows-95-desktop-background.jpg");
   loadPedit("coin", "sprites/coin.pedit");
   loadPedit("rock", "sprites/rock.pedit");
+  loadSound("score", "sounds/score.mp3");
   function startGame() {
     loadSprite("bean", "sprites/bean.png");
     loadPedit("pentagon", "sprites/Pentagon.pedit");
@@ -3013,10 +3014,10 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         const BB = add([
           sprite("cloud"),
           area(),
-          scale(rand(0.5, 4)),
-          pos(width(), rand(height() - FLOOR_HEIGHT - 30, 10)),
+          scale(rand(0.5, 4.5)),
+          pos(width(), rand(height() - FLOOR_HEIGHT - 15, 10)),
           origin("botleft"),
-          move(LEFT, SPEED * 0.2 * rand(0.5, 1.5)),
+          move(LEFT, SPEED * 0.2 * rand(0.2, 1.5)),
           "andrew"
         ]);
         wait(rand(0, 4), spawnClouds);
@@ -3054,7 +3055,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       spawnTree();
       spawnClouds();
       spawnCoins();
-      wait(rand(60, 85), spawnRocks());
+      wait(rand(60, 85), spawnRocks);
       player.onCollide("tree", () => {
         go("lose", score, highscore);
         addKaboom(player.pos);
@@ -3062,6 +3063,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       });
       player.onCollide("coin", (coin) => {
         score = score + 200;
+        play("score");
         destroy(coin);
       });
       let score = 0;
@@ -3148,21 +3150,21 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     add([
       text("THE PENTAGON"),
       origin("center"),
-      pos(width() / 2, height() / 2 - 150),
+      pos(width() / 2, height() / 2 - 200),
       scale(1.5),
       color(255, 0, 0)
     ]);
     add([
       text("Press SPACE to start!"),
       origin("center"),
-      pos(width() / 2, height() / 2 - 100),
+      pos(width() / 2, height() / 2 - 150),
       scale(1),
       color(0, 255, 0)
     ]);
     add([
-      text("AVOID obstacles!\nPress SPACE/CLICK to JUMP!\nPress ARROW KEYS to MOVE!\nPress DOWN ARROW while in the air to FAST FALL!\nBest played maximized."),
+      text("AVOID obstacles!\nPress SPACE/CLICK to JUMP!\nPress ARROW KEYS to MOVE!\nPress DOWN ARROW while in the air to FAST FALL!\nSpeed increases over time!"),
       origin("center"),
-      pos(width() / 2, height() / 2 + 30),
+      pos(width() / 2, height() / 2 + 10),
       scale(0.5),
       color(0, 255, 0)
     ]);
@@ -3183,6 +3185,22 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       color(0, 0, 255),
       "olist"
     ]);
+    if (height() < 600) {
+      add([
+        text("The size of your window is smaller than recommended.\nYou should resize it bigger, if possible."),
+        scale(0.3),
+        pos(0, height() / 2 + 100),
+        outline(6)
+      ]);
+    }
+    if (width() < 1e3) {
+      add([
+        text("The size of your window is smaller than recommended.\nYou should resize it bigger, if possible."),
+        scale(0.3),
+        pos(0, height() / 2 + 100),
+        outline(6)
+      ]);
+    }
     onKeyPress("space", () => startGame());
     onKeyPress("o", () => go("obstacles"));
     onClick("olist", (olist) => go("obstacles"));
@@ -3210,41 +3228,54 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     ]);
     add([
       sprite("coin"),
-      pos(width() / 2.5, height() / 2 - 150),
+      pos(width() / 2.25, height() / 2 - 150),
       scale(1.5),
       origin("center")
     ]);
     add([
       text("COIN\nUncommon obstacle.\nGrab it for 200 points!"),
       origin("center"),
-      pos(width() / 2.5, height() / 2 - 100),
+      pos(width() / 2.25, height() / 2 - 100),
       scale(0.3),
       color(0, 255, 0)
     ]);
     add([
-      rect(48, 48),
+      sprite("cloud"),
       origin("center"),
-      outline(4),
-      pos(width() / 1.5, height() / 2 - 150),
-      color(131, 106, 36),
-      "tree"
+      scale(3),
+      pos(width() / 1.5, height() / 2 - 150)
     ]);
     add([
-      text("TREE\nCommon obstacle.\nHitting it results in game over."),
+      text("CLOUD\nCommon obstacle.\nObscures vision."),
       origin("center"),
       pos(width() / 1.5, height() / 2 - 100),
       scale(0.3),
-      color(255, 0, 0)
+      color(0, 255, 0)
     ]);
     add([
       sprite("rock"),
       origin("center"),
       outline(4),
-      pos(width() / 5, height() / 2 + 100),
+      pos(width() / 1.5, height() / 2 + 100),
       "tree"
     ]);
     add([
-      text("ROCK\nUncommon obstacle.\nSlower than a tree, hitting it results in game over."),
+      text("ROCK\nUncommon obstacle.\nSlow moving, hitting it results in game over."),
+      origin("center"),
+      pos(width() / 1.5, height() / 2 + 150),
+      scale(0.3),
+      color(255, 0, 0)
+    ]);
+    add([
+      rect(48, 48),
+      origin("center"),
+      outline(4),
+      pos(width() / 5, height() / 2 + 100),
+      color(131, 106, 36),
+      "tree"
+    ]);
+    add([
+      text("TREE\nCommon obstacle.\nHitting it results in game over."),
       origin("center"),
       pos(width() / 5, height() / 2 + 150),
       scale(0.3),
