@@ -21,6 +21,7 @@ loadPedit("pentagon", "sprites/Pentagon.pedit");
 loadPedit("andrew", "sprites/andrew.pedit");
 loadPedit("cloud", "sprites/cloud.pedit");
 loadSprite("sky","sprites/windows-95-desktop-background.jpg");
+loadPedit("coin", "sprites/coin.pedit");
 function startGame()
 {
 // load assets
@@ -31,7 +32,7 @@ loadSprite("shop", "sprites/shop.jpg");
 //         loadPedit("beanl", "sprites/beanl.pedit");
 //         loadPedit("ghosty", "sprites/ghosty.pedit");
 //         loadPedit("spike", "sprites/spike.pedit");
-         loadPedit("cloud", "sprites/cloud.pedit");
+loadPedit("cloud", "sprites/cloud.pedit");
 //         loadPedit("rock", "sprites/rock.pedit");
 //         loadPedit("box", "sprites/box.pedit");
 //         loadPedit("monster", "sprites/monster.pedit");
@@ -43,7 +44,6 @@ loadSprite("shop", "sprites/shop.jpg");
 //         loadPedit("apple", "sprites/apple.pedit");
 //         loadPedit("portal", "sprites/portal.pedit");
 //         loadPedit("portal2", "sprites/portal2.pedit");
-//         loadPedit("coin", "sprites/coin.pedit");
 //loadPedit("andrew", "sprites/andrew.pedit");
 //         loadPedit("bottle", "sprites/bottle.pedit");
 //   const LEVELS = [
@@ -320,7 +320,6 @@ add([
 		// add tree obj
 		const BB = add([
 			sprite("cloud"),
-      layer("midground"),
 			area(),
       scale(rand(.5, 2)),
 			//outline(4),
@@ -335,19 +334,44 @@ add([
     
 
 	}
+function spawnCoins() {
 
+		// add tree obj
+		add([
+			sprite("coin"),
+      layer("midground"),
+			area(),
+      scale(1),
+			outline(4),
+			pos(width(), rand(height() - 40, height() - 200)),
+			origin("botleft"),
+			move(LEFT, SPEED*0.2*rand(.3,1.3)),
+      "coin",
+		]);
+
+		// wait a random amount of time to spawn next tree
+		wait(rand(10, 30), spawnCoins);
+    
+
+	}
   
 	// start spawning trees
 	spawnTree();
   spawnClouds();
-  // wait(20, SPEED = SPEED + 10);
+  spawnCoins();
 	// lose if player collides with any game obj with tag "tree"
 	player.onCollide("tree", () => {
 		// go to "lose" scene and pass the score
 		go("lose", score, highscore);
 		addKaboom(player.pos);
+    shake(50)
 	});
-
+  
+  player.onCollide("coin", (coin) => {
+    score = score + 200
+    destroy(coin)
+  });
+  
 	// keep track of score
 	let score = 0;
 	const scoreLabel = add([

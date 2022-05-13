@@ -2925,6 +2925,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadPedit("andrew", "sprites/andrew.pedit");
   loadPedit("cloud", "sprites/cloud.pedit");
   loadSprite("sky", "sprites/windows-95-desktop-background.jpg");
+  loadPedit("coin", "sprites/coin.pedit");
   function startGame() {
     loadSprite("bean", "sprites/bean.png");
     loadPedit("pentagon", "sprites/Pentagon.pedit");
@@ -3020,11 +3021,32 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         wait(rand(0, 4), spawnClouds);
       }
       __name(spawnClouds, "spawnClouds");
+      function spawnCoins() {
+        add([
+          sprite("coin"),
+          layer("midground"),
+          area(),
+          scale(1),
+          outline(4),
+          pos(width(), rand(height() - 40, height() - 200)),
+          origin("botleft"),
+          move(LEFT, SPEED * 0.2 * rand(0.3, 1.3)),
+          "coin"
+        ]);
+        wait(rand(10, 30), spawnCoins);
+      }
+      __name(spawnCoins, "spawnCoins");
       spawnTree();
       spawnClouds();
+      spawnCoins();
       player.onCollide("tree", () => {
         go("lose", score, highscore);
         addKaboom(player.pos);
+        shake(50);
+      });
+      player.onCollide("coin", (coin) => {
+        score = score + 200;
+        destroy(coin);
       });
       let score = 0;
       const scoreLabel = add([
