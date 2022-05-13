@@ -20,7 +20,7 @@ loadSprite("shop", "sprites/shop.jpg");
 loadPedit("pentagon", "sprites/Pentagon.pedit");
 loadPedit("andrew", "sprites/andrew.pedit");
 loadPedit("cloud", "sprites/cloud.pedit");
-loadSprite("sky","https://www.paulwheeler.us/files/windows-95-desktop-background.jpg");
+loadSprite("sky","sprites/windows-95-desktop-background.jpg");
 function startGame()
 {
 // load assets
@@ -324,15 +324,14 @@ add([
 			area(),
       scale(rand(.5, 2)),
 			//outline(4),
-			pos(width(), rand(height() - FLOOR_HEIGHT, 0)),
+			pos(width(), rand(height() - FLOOR_HEIGHT - 30, 10)),
 			origin("botleft"),
-			//color(131, 0, 0),
 			move(LEFT, SPEED*0.2*rand(.5,1.5)),
 			"andrew",
 		]);
 
 		// wait a random amount of time to spawn next tree
-		wait(rand(0, 2), spawnClouds);
+		wait(rand(0, 4), spawnClouds);
     
 
 	}
@@ -345,8 +344,7 @@ add([
 	// lose if player collides with any game obj with tag "tree"
 	player.onCollide("tree", () => {
 		// go to "lose" scene and pass the score
-		go("lose", score);
-		burp();
+		go("lose", score, highscore);
 		addKaboom(player.pos);
 	});
 
@@ -411,15 +409,16 @@ scene("lose", (score) => {
 		pos(width() / 2, height() / 2 + 80),
 		scale(2),
 		origin("center"),
-    color(255,255,255)
+    color(255,255,255)  
 	]);
+  
   if (score >= highscore) {
       add([
         text("New record!"),
-        pos(width() / 2, heght() / 2 + 40),
+        pos(width() / 2, height() / 2 + 40),
         scale(1),
         origin("center"),
-        finalscoreLabel.color = rbg(255, 196, 0),
+        finalscoreLabel.color = rgb(255, 196, 0),
       ]);
     }
   add([
