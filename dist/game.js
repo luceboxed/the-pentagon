@@ -2914,7 +2914,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
 
   // code/main.js
   var FLOOR_HEIGHT = 48;
-  var JUMP_FORCE = 800;
+  var JUMP_FORCE = 1e3;
   var highscore = 0;
   var attempts = 0;
   no({
@@ -2927,6 +2927,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadSprite("sky", "sprites/windows-95-desktop-background.jpg");
   loadPedit("coin", "sprites/coin.pedit");
   loadPedit("rock", "sprites/rock.pedit");
+  loadPedit("ground", "sprites/ground.pedit");
   loadSound("score", "sounds/score.mp3");
   function startGame() {
     loadSprite("bean", "sprites/bean.png");
@@ -2934,11 +2935,13 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     loadSprite("shop", "sprites/shop.jpg");
     loadPedit("cloud", "sprites/cloud.pedit");
     loadPedit("rock", "sprites/rock.pedit");
+    loadPedit("ground", "sprites/ground.pedit");
     scene("game", () => {
       layers([
         "background",
         "midground",
-        "game"
+        "game",
+        "ui"
       ], "game");
       add([
         sprite("sky"),
@@ -2950,7 +2953,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         sprite("pentagon"),
         pos(80, 40),
         area(),
-        body()
+        body(),
+        outview({ hide: true, pause: false })
       ]);
       add([
         rect(width(), FLOOR_HEIGHT),
@@ -3014,13 +3018,14 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         const BB = add([
           sprite("cloud"),
           area(),
+          layer("ui"),
           scale(rand(0.5, 4.5)),
-          pos(width(), rand(height() - FLOOR_HEIGHT - 15, 10)),
+          pos(width(), rand(height() - FLOOR_HEIGHT)),
           origin("botleft"),
-          move(LEFT, SPEED * 0.2 * rand(0.2, 1.5)),
+          move(LEFT, SPEED * 0.2 * rand(0.05, 1.5)),
           "andrew"
         ]);
-        wait(rand(0, 4), spawnClouds);
+        wait(rand(0, Math.abs(4 - SPEED * 1e-5)), spawnClouds);
       }
       __name(spawnClouds, "spawnClouds");
       function spawnCoins() {
@@ -3032,7 +3037,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           outline(4),
           pos(width(), rand(height() - 40, height() - 200)),
           origin("botleft"),
-          move(LEFT, SPEED * rand(0.1, 0.4)),
+          move(LEFT, SPEED * rand(0.01, 0.4)),
           "coin"
         ]);
         wait(rand(10, 30), spawnCoins);
@@ -3046,15 +3051,35 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           outline(4),
           pos(width(), height() - FLOOR_HEIGHT),
           origin("botleft"),
-          move(LEFT, SPEED * rand(0.1, 0.3)),
+          move(LEFT, SPEED * 0.05),
           "tree"
         ]);
-        wait(rand(20, 60), spawnRocks);
+        wait(rand(10, 34), spawnRocks);
       }
       __name(spawnRocks, "spawnRocks");
+      function hardMode() {
+        add([
+          text("Lets make this a little harder..."),
+          origin("center"),
+          layer("ui"),
+          pos(width() / 2, height() / 2),
+          color(255, 0, 0),
+          "hardmodeText"
+        ]);
+        spawnRocks();
+        spawnCoins();
+        spawnCoins();
+        spawnCoins();
+        spawnClouds();
+        spawnClouds();
+        spawnClouds();
+        wait(5, every("hardmodeText", destroy));
+      }
+      __name(hardMode, "hardMode");
       spawnTree();
       spawnClouds();
       spawnCoins();
+      wait(rand(120, 360), spawnClouds);
       wait(rand(60, 85), spawnRocks);
       player.onCollide("tree", () => {
         go("lose", score, highscore);
@@ -3069,29 +3094,35 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       let score = 0;
       const scoreLabel = add([
         text(score),
-        pos(100, 24)
+        pos(100, 24),
+        layer("ui")
       ]);
       add([
         text("Score"),
+        layer("ui"),
         pos(100, 4),
         scale(0.5)
       ]);
       const highscoreLabel = add([
         text(highscore),
+        layer("ui"),
         pos(300, 24),
         color(0, 0, 0)
       ]);
       add([
         text("Record"),
+        layer("ui"),
         pos(300, 4),
         scale(0.5)
       ]);
       const attemptLabel = add([
         text(attempts),
+        layer("ui"),
         pos(500, 24)
       ]);
       add([
         text("Attempt"),
+        layer("ui"),
         pos(500, 4),
         scale(0.5)
       ]);
@@ -3187,18 +3218,22 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     ]);
     if (height() < 600) {
       add([
-        text("The size of your window is smaller than recommended.\nYou should resize it bigger, if possible."),
+        text("The size of your window is smaller than recommended.\nYou should resize it bigger if possible and refresh."),
         scale(0.3),
         pos(0, height() / 2 + 100),
-        outline(6)
+        outline(6),
+        shake(10),
+        color(108, 1, 11)
       ]);
     }
     if (width() < 1e3) {
       add([
-        text("The size of your window is smaller than recommended.\nYou should resize it bigger, if possible."),
+        text("The size of your window is smaller than recommended.\nYou should resize it bigger if possible and refresh."),
         scale(0.3),
         pos(0, height() / 2 + 100),
-        outline(6)
+        outline(6),
+        shake(10),
+        color(208, 11, 11)
       ]);
     }
     onKeyPress("space", () => startGame());

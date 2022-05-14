@@ -1,1 +1,1 @@
-# dedicated to the man himself, ricky
+# TURN IT ON ANY CHANNEL

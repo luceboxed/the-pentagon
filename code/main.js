@@ -1,7 +1,7 @@
 import kaboom from "kaboom";
 
 const FLOOR_HEIGHT = 48;
-const JUMP_FORCE = 800;
+const JUMP_FORCE = 1000;
 let highscore = 0;
 let attempts = 0;
 // initialize context
@@ -23,6 +23,7 @@ loadPedit("cloud", "sprites/cloud.pedit");
 loadSprite("sky","sprites/windows-95-desktop-background.jpg");
 loadPedit("coin", "sprites/coin.pedit");
 loadPedit("rock", "sprites/rock.pedit");
+loadPedit("ground", "sprites/ground.pedit");
 loadSound("score", "sounds/score.mp3")
 function startGame()
 {
@@ -39,7 +40,7 @@ loadPedit("rock", "sprites/rock.pedit");
 //         loadPedit("box", "sprites/box.pedit");
 //         loadPedit("monster", "sprites/monster.pedit");
 //         loadPedit("grass", "sprites/grass.pedit");
-//         loadPedit("ground", "sprites/ground.pedit");
+loadPedit("ground", "sprites/ground.pedit");
 //         loadPedit("birdr", "sprites/birdr.pedit");
 //         loadPedit("birdl", "sprites/birdl.pedit");
 //         loadPedit("prize", "sprites/prize.pedit");
@@ -194,7 +195,8 @@ scene("game", () => {
 layers([
     "background",
   "midground",
-    "game"
+    "game",
+  "ui"
 ], "game");
 
 add([
@@ -236,6 +238,7 @@ add([
 		pos(80, 40),
 		area(),
 		body(),
+    outview({ hide: true, pause: false}),
 	]);
 
 	// floor
@@ -263,7 +266,7 @@ add([
   function walkRight(){
     player.move(500,0);
   }
-
+  
   onKeyDown("right",(walkRight))
   
   
@@ -323,16 +326,17 @@ add([
 		const BB = add([
 			sprite("cloud"),
 			area(),
+      layer("ui"),
       scale(rand(.5, 4.5)),
 			//outline(4),
-			pos(width(), rand(height() - FLOOR_HEIGHT - 15, 10)),
+			pos(width(), rand(height() - FLOOR_HEIGHT)),
 			origin("botleft"),
-			move(LEFT, SPEED*0.2*rand(.2,1.5)),
+			move(LEFT, SPEED*0.2*rand(.05,1.5)),
 			"andrew",
 		]);
 
 		// wait a random amount of time to spawn next tree
-		wait(rand(0, 4), spawnClouds);
+		wait(rand(0, Math.abs(4 - (SPEED * .00001))), spawnClouds);
     
 
 	}
@@ -347,7 +351,7 @@ function spawnCoins() {
 			outline(4),
 			pos(width(), rand(height() - 40, height() - 200)),
 			origin("botleft"),
-			move(LEFT, SPEED*rand(.1,.4)),
+			move(LEFT, SPEED*rand(.01,.4)),
       "coin",
 		]);
 
@@ -364,16 +368,35 @@ function spawnRocks() {
 			outline(4),
 			pos(width(), height() - FLOOR_HEIGHT),
 			origin("botleft"),
-			move(LEFT, SPEED*rand(.1,.3)),
+			move(LEFT, SPEED*.05),
       "tree",
 		]);
-    wait(rand(20,60), spawnRocks);
+    wait(rand(10,34), spawnRocks);
+}
+function hardMode() {
+  add([
+    text("Lets make this a little harder..."), origin("center"),
+    layer("ui"),
+    pos(width() / 2, height() / 2 ),
+    color(255, 0, 0),
+    "hardmodeText"
+  ])
+  spawnRocks();
+  spawnCoins();
+  spawnCoins();
+  spawnCoins();
+  spawnClouds();
+  spawnClouds();
+  spawnClouds();
+  wait(5, every("hardmodeText", destroy))
 }
 	// start spawning trees
 	spawnTree();
   spawnClouds();
   spawnCoins();
+  wait(rand(120,360), spawnClouds)
   wait(rand(60,85), spawnRocks);
+  //wait(120, hardMode)
 	// lose if player collides with any game obj with tag "tree"
 	player.onCollide("tree", () => {
 		// go to "lose" scene and pass the score
@@ -393,28 +416,34 @@ function spawnRocks() {
 	const scoreLabel = add([
 		text(score),
 		pos(100, 24),
+    layer("ui"),
 	]);
   add([
     text("Score"),
+    layer("ui"),
     pos(100, 4),
     scale(.5)
   ])
   const highscoreLabel = add([
     text(highscore),
+    layer("ui"),
     pos(300, 24),
     color(0, 0, 0)
   ])
   add([
     text("Record"),
+    layer("ui"),
     pos(300, 4),
     scale(.5)
   ])
   const attemptLabel = add([
     text(attempts),
+    layer("ui"),
     pos(500, 24),
   ])
   add([
     text("Attempt"),
+    layer("ui"),
     pos(500, 4),
     scale(.5)
   ])
@@ -521,18 +550,22 @@ scene("menu", () => {
 	]);
   if (height() < 600) {
     add([
-      text("The size of your window is smaller than recommended.\nYou should resize it bigger, if possible."),
+      text("The size of your window is smaller than recommended.\nYou should resize it bigger if possible and refresh."),
   scale(0.3),
   pos(0, height() / 2 + 100),
   outline(6),
+  shake(10),
+  color(108, 1, 11),
     ])
   }
   if (width() < 1000) {
     add([
-      text("The size of your window is smaller than recommended.\nYou should resize it bigger, if possible."),
+      text("The size of your window is smaller than recommended.\nYou should resize it bigger if possible and refresh."),
   scale(0.3),
   pos(0, height() / 2 + 100),
   outline(6),
+  shake(10),
+  color(208, 11, 11),
     ])
   }
   onKeyPress("space", () => startGame());
