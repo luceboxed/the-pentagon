@@ -2918,6 +2918,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   var topscores = [];
   var highscore = 0;
   var attempts = 0;
+  var doublejump = 0;
   no({
     background: [134, 135, 247]
   });
@@ -2982,6 +2983,12 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       function jump() {
         if (player.isGrounded()) {
           player.jump(JUMP_FORCE);
+          doublejump = doublejump + 1;
+        } else {
+          if (doublejump > 1) {
+            player.jump(JUMP_FORCE / 1.5);
+            doublejump = doublejump - 1;
+          }
         }
       }
       __name(jump, "jump");

@@ -5,6 +5,7 @@ const JUMP_FORCE = 1000;
 const topscores = []
 let highscore = 0;
 let attempts = 0;
+let doublejump = 0;
 // initialize context
 kaboom({
   // global: true,
@@ -140,7 +141,14 @@ add([
 	function jump() {
 		if (player.isGrounded()) {
 			player.jump(JUMP_FORCE);
+      doublejump = doublejump + 1
 		}
+    else {
+      if (doublejump > 1) {
+        player.jump(JUMP_FORCE / 1.5);
+        doublejump = doublejump - 1
+      }
+    }
 	}
 
   function fall() {
