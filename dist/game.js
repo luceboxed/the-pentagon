@@ -3216,6 +3216,12 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       color(0, 0, 255),
       "olist"
     ]);
+    add([
+      text("made with <3\nvery cool kaboom team 2022"),
+      pos(0, 0),
+      scale(0.2),
+      color(255, 0, 0)
+    ]);
     if (height() < 600) {
       add([
         text("The size of your window is smaller than recommended.\nYou should resize it bigger if possible and refresh."),
