@@ -2916,7 +2916,6 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   var FLOOR_HEIGHT = 48;
   var JUMP_FORCE = 1e3;
   var topscores = [];
-  var hLen = topscores.length;
   var highscore = 0;
   var attempts = 0;
   no({
@@ -2947,7 +2946,10 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       ], "game");
       add([
         sprite("sky"),
-        layer("background")
+        layer("background"),
+        scale(2),
+        pos(width() / 2, height() / 2),
+        origin("center")
       ]);
       gravity(2400);
       let SPEED = 1e3;
@@ -3005,14 +3007,14 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         add([
           rect(rand(48, 320), FLOOR_HEIGHT),
           outline(4),
-          pos(width(), rand(height() - FLOOR_HEIGHT, height() / 2)),
+          pos(width(), rand(height() - FLOOR_HEIGHT, height() / 2 + 100)),
           origin("botright"),
           area(),
           solid(),
           move(LEFT, SPEED * rand(0.2, 0.8)),
           color(127, 0, 255)
         ]);
-        wait(rand(30, 86), spawnPlatforms);
+        wait(rand(15, 86), spawnPlatforms);
       }
       __name(spawnPlatforms, "spawnPlatforms");
       function spawnTree() {
@@ -3329,7 +3331,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       "tree"
     ]);
     add([
-      text("ROCK\nUncommon obstacle.\nSlow moving, hitting it results in game over."),
+      text("ROCK\nUncommon obstacle.\nSlow moving. \nHitting it results in game over."),
       origin("center"),
       pos(width() / 1.5, height() / 2 + 150),
       scale(0.3),
@@ -3356,6 +3358,20 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       pos(width() / 2, height() / 2 + 300),
       scale(1),
       color(0, 0, 255)
+    ]);
+    add([
+      rect(48, 48),
+      origin("center"),
+      outline(4),
+      pos(width() / 2.25, height() / 2 + 100),
+      color(127, 0, 255)
+    ]);
+    add([
+      text("Platform\nUncommon obstacle.\nCan be stood on."),
+      origin("center"),
+      pos(width() / 2.25, height() / 2 + 150),
+      scale(0.3),
+      color(0, 255, 0)
     ]);
     onClick(() => go("menu"));
   });

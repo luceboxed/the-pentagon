@@ -3,8 +3,6 @@ import kaboom from "kaboom";
 const FLOOR_HEIGHT = 48;
 const JUMP_FORCE = 1000;
 const topscores = []
-let hLen = topscores.length;
-let scoreText = "High scores:\n"
 let highscore = 0;
 let attempts = 0;
 // initialize context
@@ -15,8 +13,8 @@ kaboom({
   // debug: true,
   // clearColor: [0, 0, 0, 1],
   background: [134, 135, 247],
-  // width: 1280,
-  // height: 960,
+  //width: 1280,
+  //height: 960,
   // scale: 1,
 });
 loadSprite("shop", "sprites/shop.jpg");
@@ -52,143 +50,6 @@ loadPedit("ground", "sprites/ground.pedit");
 //         loadPedit("portal2", "sprites/portal2.pedit");
 //loadPedit("andrew", "sprites/andrew.pedit");
 //         loadPedit("bottle", "sprites/bottle.pedit");
-//   const LEVELS = [
-//             [ //0
-//                 "                          c $ ",
-//                 "       c                c   $ ",
-//                 "             c        c     $ ",
-//                 "   cc       ~       c       $ ",
-//                 "      c                     $ ",
-//                 "          $$$     c         $ ",
-//                 "         ====         =     $ ",
-//                 "                      g     $ ",
-//                 "                      g       ",
-//                 "      ^^  m   =  m b  g      @",
-//                 "==============g=======g=======",
-//             ]]
-
-//   // define what each symbol means in the level graph
-//         const levelConf = {
-//             // grid size
-//             width: 64,
-//             height: 64,
-//             // define each object as a list of components
-//             "=": () => [
-//                 sprite("grass"),
-//                 area(),
-//                 solid(),
-//                 origin("bot"),
-//             ],
-//             "c": () => [
-//                 sprite("cloud"),
-//                 area(),
-//                 solid(),
-//                 origin("bot"),
-//                 "cloud",
-//             ],
-//             "g": () => [
-//                 sprite("ground"),
-//                 area(),
-//                 solid(),
-//                 origin("bot"),
-//             ],
-//             "r": () => [
-//                 sprite("rock"),
-//                 area(),
-//                 solid(),
-//                 origin("bot"),
-//             ],
-//             "x": () => [
-//                 sprite("box"),
-//                 area(),
-//                 solid(),
-//                 origin("bot"),
-//             ],
-//             "$": () => [
-//                 sprite("coin"),
-//                 area(),
-//                 pos(0, -9),
-//                 origin("bot"),
-//                 "coin",
-//             ],
-//             "%": () => [
-//                 sprite("prize"),
-//                 area(),
-//                 solid(),
-//                 origin("bot"),
-//                 "prize",
-//             ],
-//             "b": () => [
-//                 sprite("bottle"),
-//                 area(),
-//                 origin("bot"),
-//                 body(),
-//                 "bottle",
-//             ],
-//             "^": () => [
-//                 sprite("spike"),
-//                 area(),
-//                 solid(),
-//                 origin("bot"),
-//                 "danger",
-//             ],
-//             "#": () => [
-//                 sprite("apple"),
-//                 area(),
-//                 origin("bot"),
-//                 body(),
-//                 "apple",
-//             ],
-//             ">": () => [
-//                 sprite("ghosty"),
-//                 area(),
-//                 origin("bot"),
-//                 body(),
-//                 patrol(),
-//                 "enemy",
-//             ],
-//             "m": () => [
-//                 sprite("monster"),
-//                 area(),
-//                 origin("bot"),
-//                 body(),
-//                 patrol(),
-//                 "enemy",
-//             ],
-//             "~": () => [
-//                 sprite('birdl'),
-//                 area(),
-//                 origin("bot"),
-//                 patrolbird(),
-//                 "bird",
-//             ],
-//             "a": () => [
-//                 sprite("andrew"),
-//                 area(),
-//                 origin("bot"),
-//                 body(),
-//                 patrol(),
-//                 "enemy",
-//             ],
-//             "@": () => [
-//                 sprite("portal"),
-//                 area({
-//                     scale: 0.5,
-//                 }),
-//                 origin("bot"),
-//                 pos(0, -12),
-//                 "portal",
-//             ],
-//             "e": () => [
-//                 sprite("portal2"),
-//                 area({
-//                     scale: 0.5,
-//                 }),
-//                 origin("bot"),
-//                 pos(0, -12),
-//                 "portal",
-//             ],
-//         }
 
 
 scene("game", () => {
@@ -204,7 +65,10 @@ layers([
 
 add([
     sprite("sky"),
-    layer("background")
+    layer("background"),
+    scale(2),
+  pos(width() / 2, height() / 2),
+  origin("center"),
 ]);
 
 //   async function init() {
@@ -306,14 +170,14 @@ add([
   add([
 		rect(rand(48,320), FLOOR_HEIGHT),
 		outline(4),
-		pos(width(), rand(height() - FLOOR_HEIGHT, height() / 2)),
+		pos(width(), rand(height() - FLOOR_HEIGHT, height() / 2 + 100)),
 		origin("botright"),
 		area(),
 		solid(),
     move(LEFT, SPEED*rand(0.2, 0.8)),
 		color(127, 0, 255),
 	]);
-    wait(rand(30, 86), spawnPlatforms);
+    wait(rand(15, 86), spawnPlatforms);
   }
 	function spawnTree() {
 
@@ -651,7 +515,7 @@ scene("obstacles", () => {
 			"tree",
 		]);
   add([
-		text("ROCK\nUncommon obstacle.\nSlow moving, hitting it results in game over."), origin('center'),
+		text("ROCK\nUncommon obstacle.\nSlow moving. \nHitting it results in game over."), origin('center'),
 		pos(width() / 1.5, height() /2 + 150),
 		scale(.3),
     color(255, 0, 0)
@@ -674,6 +538,18 @@ scene("obstacles", () => {
 		pos(width()/2, height() /2 + 300),
 		scale(1),
     color(0, 0, 255)
+  ])
+  add([
+		rect(48,48), origin("center"),
+		outline(4),
+		pos(width() / 2.25, height() / 2 + 100),
+    color(127, 0, 255),
+		]);
+  add([
+		text("Platform\nUncommon obstacle.\nCan be stood on."), origin('center'),
+		pos(width()/ 2.25, height() /2 + 150),
+		scale(.3),
+    color(0, 255, 0)
   ])
   onClick(() => go("menu"));
 })
