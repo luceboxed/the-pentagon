@@ -2915,6 +2915,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   // code/main.js
   var FLOOR_HEIGHT = 48;
   var JUMP_FORCE = 1e3;
+  var topscores = [];
+  var hLen = topscores.length;
   var highscore = 0;
   var attempts = 0;
   no({
@@ -2993,13 +2995,26 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       add([
         rect(48, 2e3),
         area(),
-        solid(),
         outline(4),
         pos(-48, height() - FLOOR_HEIGHT),
         origin("botleft"),
         color(131, 106, 36),
-        "wall"
+        "tree"
       ]);
+      function spawnPlatforms() {
+        add([
+          rect(rand(48, 320), FLOOR_HEIGHT),
+          outline(4),
+          pos(width(), rand(height() - FLOOR_HEIGHT, height() / 2)),
+          origin("botright"),
+          area(),
+          solid(),
+          move(LEFT, SPEED * rand(0.2, 0.8)),
+          color(127, 0, 255)
+        ]);
+        wait(rand(30, 86), spawnPlatforms);
+      }
+      __name(spawnPlatforms, "spawnPlatforms");
       function spawnTree() {
         add([
           rect(48, rand(32, 96)),
@@ -3079,6 +3094,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       spawnTree();
       spawnClouds();
       spawnCoins();
+      spawnPlatforms();
       wait(rand(120, 360), spawnClouds);
       wait(rand(60, 85), spawnRocks);
       player.onCollide("tree", () => {
@@ -3139,34 +3155,46 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         }
       });
     });
-    scene("lose", (score) => {
+    scene("lose", (score, highscore2) => {
       add([
         sprite("pentagon"),
-        pos(width() / 2, height() / 2 + 150),
+        pos(width() / 2, height() / 3 + 150),
         scale(2),
         origin("center")
       ]);
       const finalscoreLabel = add([
         text(score),
-        pos(width() / 2, height() / 2 + 80),
+        pos(width() / 2, height() / 3 + 80),
         scale(2),
         origin("center"),
         color(255, 255, 255)
       ]);
-      if (score == highscore) {
+      if (score == highscore2) {
         add([
           text("New record!"),
-          pos(width() / 2, height() / 2 + 40),
+          pos(width() / 2, height() / 3),
           scale(1),
           origin("center"),
+          color(255, 196, 0),
           finalscoreLabel.color = rgb(255, 196, 0)
         ]);
+        topscores.push(score);
       }
       add([
         text("Click to play again\nScore"),
-        pos(width() / 2, height() / 2 - 100),
+        pos(width() / 2, height() / 3 - 100),
         scale(0.7),
         origin("center")
+      ]);
+      topscores.sort(function(a2, b2) {
+        return b2 - a2;
+      });
+      add([
+        text("Top scores:\n" + topscores.join("\n")),
+        pos(width() / 2, height() / 2 + 100),
+        scale(0.5),
+        origin("center"),
+        color(255, 255, 255)
       ]);
       onKeyPress("space", () => go("game"));
       onClick(() => go("game"));

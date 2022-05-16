@@ -2,6 +2,9 @@ import kaboom from "kaboom";
 
 const FLOOR_HEIGHT = 48;
 const JUMP_FORCE = 1000;
+const topscores = []
+let hLen = topscores.length;
+let scoreText = "High scores:\n"
 let highscore = 0;
 let attempts = 0;
 // initialize context
@@ -291,15 +294,27 @@ add([
 add([
 			rect(48, 2000),
 			area(),
-      solid(),
 			outline(4),
 			pos(-48, height() - FLOOR_HEIGHT),
 			origin("botleft"),
 			color(131, 106, 36),
 			//move(LEFT, SPEED*0.5),
-			"wall",
+			"tree",
 		]);
-  
+  // floating platforms
+  function spawnPlatforms() {
+  add([
+		rect(rand(48,320), FLOOR_HEIGHT),
+		outline(4),
+		pos(width(), rand(height() - FLOOR_HEIGHT, height() / 2)),
+		origin("botright"),
+		area(),
+		solid(),
+    move(LEFT, SPEED*rand(0.2, 0.8)),
+		color(127, 0, 255),
+	]);
+    wait(rand(30, 86), spawnPlatforms);
+  }
 	function spawnTree() {
 
 		// add tree obj
@@ -394,6 +409,7 @@ function hardMode() {
 	spawnTree();
   spawnClouds();
   spawnCoins();
+  spawnPlatforms();
   wait(rand(120,360), spawnClouds)
   wait(rand(60,85), spawnRocks);
   //wait(120, hardMode)
@@ -464,18 +480,17 @@ function hardMode() {
 
 });
 
-scene("lose", (score) => {
-
+scene("lose", (score, highscore) => {
 	add([
 		sprite("pentagon"),
-		pos(width() / 2, height() / 2 + 150),
+		pos(width() / 2, height() / 3 + 150),
 		scale(2),
 		origin("center"),
 	]);
 	// display score
 	const finalscoreLabel = add([
 		text(score),
-		pos(width() / 2, height() / 2 + 80),
+		pos(width() / 2, height() / 3 + 80),
 		scale(2),
 		origin("center"),
     color(255,255,255)  
@@ -484,19 +499,28 @@ scene("lose", (score) => {
   if (score == highscore) {
       add([
         text("New record!"),
-        pos(width() / 2, height() / 2 + 40),
+        pos(width() / 2, height() / 3),
         scale(1),
         origin("center"),
+        color(255,196,0),
         finalscoreLabel.color = rgb(255, 196, 0),
       ]);
+    topscores.push(score)
     }
   add([
     text("Click to play again\nScore"),
-    pos(width() / 2, height() / 2 - 100),
+    pos(width() / 2, height() / 3 - 100),
     scale(.7),
     origin("center")
   ])
-
+  topscores.sort(function(a, b){return b - a});
+  add([
+		text("Top scores:\n" + topscores.join("\n")),
+		pos(width() / 2, height() / 2 + 100),
+		scale(.5),
+		origin("center"),
+    color(255,255,255)  
+	]);
 	// go back to game with space is pressed
 	onKeyPress("space", () => go("game"));
 	onClick(() => go("game"));
