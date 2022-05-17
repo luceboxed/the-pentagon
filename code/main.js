@@ -107,6 +107,7 @@ add([
 	const player = add([
 		// list of components
 	  sprite("pentagon"),
+    //player.frame = 0,
 		pos(80, 40),
 		area(),
 		body(),
