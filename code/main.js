@@ -11,7 +11,7 @@ kaboom({
   // global: true,
   // fullscreen: true,
   // scale: 1,
-  // debug: true,
+  debug: false,
   // clearColor: [0, 0, 0, 1],
   background: [134, 135, 247],
   //width: 1280,
@@ -27,6 +27,9 @@ loadPedit("coin", "sprites/coin.pedit");
 loadPedit("rock", "sprites/rock.pedit");
 loadPedit("ground", "sprites/ground.pedit");
 loadSound("score", "sounds/score.mp3")
+loadSound("timewarp", "sounds/timewarp.ogg")
+loadPedit("portal", "sprites/portal.pedit");
+loadPedit("portal2", "sprites/portal2.pedit");
 function startGame()
 {
 // load assets
@@ -47,8 +50,8 @@ loadPedit("ground", "sprites/ground.pedit");
 //         loadPedit("birdl", "sprites/birdl.pedit");
 //         loadPedit("prize", "sprites/prize.pedit");
 //         loadPedit("apple", "sprites/apple.pedit");
-//         loadPedit("portal", "sprites/portal.pedit");
-//         loadPedit("portal2", "sprites/portal2.pedit");
+//         
+//         
 //loadPedit("andrew", "sprites/andrew.pedit");
 //         loadPedit("bottle", "sprites/bottle.pedit");
 
@@ -98,6 +101,7 @@ add([
 	// define gravity
 	gravity(2400);
   let SPEED = 1000
+  doublejump = 0
 
 	// add a game object to screen
 	const player = add([
@@ -125,6 +129,7 @@ add([
    }
 
   onKeyDown("left",(walkLeft))
+  onKeyDown("a", (walkLeft))
 
   // onKeyDown("left", () => {
   //               //player.use(sprite('beanl'))
@@ -136,17 +141,22 @@ add([
   }
   
   onKeyDown("right",(walkRight))
-  
+  onKeyDown("d", (walkRight))
   
 	function jump() {
 		if (player.isGrounded()) {
 			player.jump(JUMP_FORCE);
-      doublejump = doublejump + 1
+      if (doublejump == 0) {
+        doublejump += 1
+      }
+      jumpMeter.text = doublejump
 		}
     else {
-      if (doublejump > 1) {
+      if (doublejump >= 1) {
+        addKaboom(player.pos)
         player.jump(JUMP_FORCE / 1.5);
         doublejump = doublejump - 1
+        jumpMeter.text = doublejump
       }
     }
 	}
@@ -182,8 +192,9 @@ add([
 		origin("botright"),
 		area(),
 		solid(),
-    move(LEFT, SPEED*rand(0.2, 0.8)),
+    move(LEFT, rand(500,(SPEED*rand(0.01, 0.8)))),
 		color(127, 0, 255),
+    cleanup(),
 	]);
     wait(rand(15, 86), spawnPlatforms);
   }
@@ -197,8 +208,9 @@ add([
 			pos(width(), height() - FLOOR_HEIGHT),
 			origin("botleft"),
 			color(131, 106, 36),
-			move(LEFT, SPEED*0.2),
+			move(LEFT, (SPEED*0.2)),
 			"tree",
+      cleanup(),
 		]);
 
 		// wait a random amount of time to spawn next tree
@@ -214,16 +226,17 @@ add([
 			sprite("cloud"),
 			area(),
       layer("ui"),
-      scale(rand(.5, 4.5)),
+      scale(rand(.001, 4.5)),
 			//outline(4),
 			pos(width(), rand(height() - FLOOR_HEIGHT)),
 			origin("botleft"),
-			move(LEFT, SPEED*0.2*rand(.05,1.5)),
+			move(LEFT, (SPEED*0.2*rand(.05,2))),
 			"andrew",
+      cleanup(),
 		]);
 
 		// wait a random amount of time to spawn next tree
-		wait(rand(0, Math.abs(4 - (SPEED * .00001))), spawnClouds);
+		wait(rand(0,(Math.abs(4 - (SPEED * .00001)))), spawnClouds);
     
 
 	}
@@ -238,8 +251,9 @@ function spawnCoins() {
 			outline(4),
 			pos(width(), rand(height() - 40, height() - 200)),
 			origin("botleft"),
-			move(LEFT, SPEED*rand(.01,.4)),
+			move(LEFT, rand(700,(SPEED*rand(.01,.4)))),
       "coin",
+      cleanup(),
 		]);
 
 		// wait a random amount of time to spawn next tree
@@ -255,36 +269,67 @@ function spawnRocks() {
 			outline(4),
 			pos(width(), height() - FLOOR_HEIGHT),
 			origin("botleft"),
-			move(LEFT, SPEED*.05),
+			move(LEFT, rand(400,(SPEED*.05))),
       "tree",
+    cleanup(),
 		]);
     wait(rand(10,34), spawnRocks);
 }
-function hardMode() {
+  function spawnWarps() {
+    add([
+      sprite("portal"),
+      layer("midground"),
+			area(),
+      scale(1),
+			outline(4),
+			pos(width(), rand(height() - 40, height() - 200)),
+			origin("botleft"),
+			move(LEFT, 400),
+      "warp",
+      cleanup(),
+		]);
+    wait(rand(120, 200), spawnWarps)
+  }
+  function spawnBonusLeaps() {
+    add([
+      sprite("portal2"),
+      layer("midground"),
+			area(),
+      scale(1),
+			outline(4),
+			pos(width(), rand(height() - 40, height() - 200)),
+			origin("botleft"),
+			move(LEFT, rand(400,1000)),
+      "bleap",
+      cleanup(),
+		]);
+    wait(rand(45, 60), spawnBonusLeaps)
+  }
+function cloudyMode() {
   add([
-    text("Lets make this a little harder..."), origin("center"),
+    text("The air is getting foggy..."), origin("center"),
     layer("ui"),
     pos(width() / 2, height() / 2 ),
     color(255, 0, 0),
-    "hardmodeText"
+    "hardmodeText",
+    lifespan(5, { fade: 1 }),
   ])
-  spawnRocks();
-  spawnCoins();
-  spawnCoins();
   spawnCoins();
   spawnClouds();
   spawnClouds();
   spawnClouds();
-  wait(5, every("hardmodeText", destroy))
+  spawnClouds();
+  spawnClouds();
 }
 	// start spawning trees
 	spawnTree();
   spawnClouds();
   spawnCoins();
-  spawnPlatforms();
-  wait(rand(120,360), spawnClouds)
+  spawnBonusLeaps();
+  wait(60, spawnWarps);
+  wait(rand(30,60),spawnPlatforms);
   wait(rand(60,85), spawnRocks);
-  //wait(120, hardMode)
+  wait(240, cloudyMode)
 	// lose if player collides with any game obj with tag "tree"
 	player.onCollide("tree", () => {
 		// go to "lose" scene and pass the score
@@ -298,7 +343,17 @@ function hardMode() {
     play("score")
     destroy(coin)
   });
-  
+
+  player.onCollide("warp", (warp) => {
+    SPEED = (SPEED - (SPEED * .5))
+    play("timewarp")
+    destroy(warp)
+  })
+  player.onCollide("bleap", (bleap) => {
+    doublejump = doublejump + 1
+    jumpMeter.text = doublejump
+    destroy(bleap)
+  })
 	// keep track of score
 	let score = 0;
 	const scoreLabel = add([
@@ -306,7 +361,7 @@ function hardMode() {
 		pos(100, 24),
     layer("ui"),
 	]);
-  add([
+  const scoreUI = add([
     text("Score"),
     layer("ui"),
     pos(100, 4),
@@ -318,7 +373,7 @@ function hardMode() {
     pos(300, 24),
     color(0, 0, 0)
   ])
-  add([
+  const recordUI = add([
     text("Record"),
     layer("ui"),
     pos(300, 4),
@@ -329,14 +384,35 @@ function hardMode() {
     layer("ui"),
     pos(500, 24),
   ])
-  add([
+  const attemptUI = add([
     text("Attempt"),
     layer("ui"),
     pos(500, 4),
     scale(.5)
   ])
+  const jumpMeter = add([
+    text(doublejump),
+    layer("ui"),
+    pos(700, 24),
+    scale(.5)
+  ])
+  const leapLabel = add([
+    text("Leaps"),
+    layer("ui"),
+    pos(700, 4),
+    scale(.5),
+    "leapLabel",
+    lifespan(4, { fade: 0.5 })
+  ])
+  if (highscore >= 10000) {
+    scoreLabel.moveTo(100, 24)
+    scoreUI.moveTo(100, 4)
+    highscoreLabel.moveTo(400,24)
+    recordUI.moveTo(400,4)
+    attemptLabel.moveTo(700,24)
+    attemptUI.moveTo(700,4)
+  }
 	// increment score every frame
-    
   attempts = attempts + 1;
   attemptLabel.text = attempts;
 	onUpdate(() => {
@@ -348,8 +424,27 @@ function hardMode() {
       highscoreLabel.text = highscore;
       highscoreLabel.color = rgb(255, 196, 0)
     }
+    if (doublejump >= 1) {
+      jumpMeter.color = rgb(0, 255, 0)
+    }
+    else {
+      jumpMeter.color = rgb(255, 255, 255)
+    }
+    jumpMeter.moveTo(player.pos, 600)
+    leapLabel.moveTo(player.pos, 300)
+    if (score >= 10000) {
+    scoreLabel.moveTo(100, 24, 30)
+    scoreUI.moveTo(100, 4, 30)
+    highscoreLabel.moveTo(400,24, 30)
+    recordUI.moveTo(400,4, 30)
+    attemptLabel.moveTo(700,24, 50)
+    attemptUI.moveTo(700,4, 50)
+  }
 	});
-
+//debug
+//score = 9990
+//SPEED = 9998
+onKeyPress("r", () => { go("lose", score, highscore) })
 });
 
 scene("lose", (score, highscore) => {
@@ -380,7 +475,7 @@ scene("lose", (score, highscore) => {
     topscores.push(score)
     }
   add([
-    text("Click to play again\nScore"),
+    text("Click to play again.\nPress M to return to MENU.\nScore"),
     pos(width() / 2, height() / 3 - 100),
     scale(.7),
     origin("center")
@@ -396,7 +491,7 @@ scene("lose", (score, highscore) => {
 	// go back to game with space is pressed
 	onKeyPress("space", () => go("game"));
 	onClick(() => go("game"));
-  onKeyPress("s", () => go("shop"));
+  onKeyPress("m", () => go("menu"));
 
 
 });
@@ -423,7 +518,7 @@ scene("menu", () => {
 		scale(1),
     color(0, 255, 0)
 	]);
-  add([text("AVOID obstacles!\nPress SPACE/CLICK to JUMP!\nPress ARROW KEYS to MOVE!\nPress DOWN ARROW while in the air to FAST FALL!\nSpeed increases over time!"), origin('center'),
+  add([text("AVOID obstacles!\nPress SPACE/CLICK to JUMP! Press again to LEAP!\nPress ARROW KEYS to MOVE!\nPress DOWN ARROW while in the air to FAST FALL!\nSpeed increases over time!\nPress R to give up."), origin('center'),
 		pos(width()/2, height() /2 + 10),
 		scale(.5),
     color(0, 255, 0)
@@ -445,9 +540,9 @@ scene("menu", () => {
     "olist",
 	]);
   add([
-		text("made with <3\nvery cool kaboom team 2022"),
+		text("made with <3\nby very cool kaboom team 2022"),
 		pos(0, 0),
-		scale(.2),
+		scale(.3),
     color(255, 0, 0),
 	]);
   if (height() < 600) {
@@ -476,7 +571,7 @@ scene("menu", () => {
 });
 scene("obstacles", () => {
   add([
-		text("OBSTACLES"), origin('center'),
+		text("OBSTACLES\nPage 1/2"), origin('center'),
 		pos(width()/2, height() /2 - 300),
 		scale(1.5),
     color(255, 0, 0)
@@ -500,7 +595,7 @@ scene("obstacles", () => {
     origin("center"),
   ])
   add([
-		text("COIN\nUncommon obstacle.\nGrab it for 200 points!"), origin('center'),
+		text("COIN\nUncommon item.\nGrab it for 200 points!"), origin('center'),
 		pos(width()/ 2.25, height() /2 - 100),
 		scale(.3),
     color(0, 255, 0)
@@ -542,7 +637,7 @@ scene("obstacles", () => {
     color(255, 0, 0)
   ])
   add([
-		text("Click to return to menu."), origin('center'),
+		text("Click to return to menu.\nPress 1/2 to switch pages."), origin('center'),
 		pos(width()/2, height() /2 + 300),
 		scale(1),
     color(0, 0, 255)
@@ -560,5 +655,45 @@ scene("obstacles", () => {
     color(0, 255, 0)
   ])
   onClick(() => go("menu"));
+  onKeyPress("2", () => go("obstacles2"));
+})
+scene("obstacles2", () => {
+  add([
+		text("OBSTACLES\nPage 2/2"), origin('center'),
+		pos(width()/2, height() /2 - 300),
+		scale(1.5),
+    color(255, 0, 0)
+  ])
+  add([
+    sprite("portal"),
+		pos(width() / 5, height() / 2 - 150),
+		scale(1.5),
+		origin("center"),
+  ])
+  add([
+		text("TIME WARP\nRare item.\nA spaital rift moving at a constant speed,\ncollect it to slow down all objects!"), origin('center'),
+		pos(width()/ 5, height() /2 - 100),
+		scale(.3),
+    color(0, 255, 0)
+  ])
+  add([
+			sprite("portal2"), origin("center"),
+      scale(3),
+			pos(width() / 1.5, height() / 2 - 150),
+		]);
+  add([
+		text("LEAP BALL\nUncommon item.\nGrants you an extra leap to use in midair."), origin('center'),
+		pos(width()/ 1.5, height() /2 - 100),
+		scale(.3),
+    color(0, 255, 0)
+  ])
+  add([
+		text("Click to return to menu.\nPress 1/2 to switch pages."), origin('center'),
+		pos(width()/2, height() /2 + 300),
+		scale(1),
+    color(0, 0, 255)
+  ])
+  onClick(() => go("menu"));
+  onKeyPress("1", () => go("obstacles"));
 })
 go("menu")

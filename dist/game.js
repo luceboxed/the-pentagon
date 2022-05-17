@@ -2920,6 +2920,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   var attempts = 0;
   var doublejump = 0;
   no({
+    debug: false,
     background: [134, 135, 247]
   });
   loadSprite("shop", "sprites/shop.jpg");
@@ -2931,6 +2932,9 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadPedit("rock", "sprites/rock.pedit");
   loadPedit("ground", "sprites/ground.pedit");
   loadSound("score", "sounds/score.mp3");
+  loadSound("timewarp", "sounds/timewarp.ogg");
+  loadPedit("portal", "sprites/portal.pedit");
+  loadPedit("portal2", "sprites/portal2.pedit");
   function startGame() {
     loadSprite("bean", "sprites/bean.png");
     loadPedit("pentagon", "sprites/Pentagon.pedit");
@@ -2954,6 +2958,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       ]);
       gravity(2400);
       let SPEED = 1e3;
+      doublejump = 0;
       const player = add([
         sprite("pentagon"),
         pos(80, 40),
@@ -2975,19 +2980,26 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
       __name(walkLeft, "walkLeft");
       onKeyDown("left", walkLeft);
+      onKeyDown("a", walkLeft);
       function walkRight() {
         player.move(500, 0);
       }
       __name(walkRight, "walkRight");
       onKeyDown("right", walkRight);
+      onKeyDown("d", walkRight);
       function jump() {
         if (player.isGrounded()) {
           player.jump(JUMP_FORCE);
-          doublejump = doublejump + 1;
+          if (doublejump == 0) {
+            doublejump += 1;
+          }
+          jumpMeter.text = doublejump;
         } else {
-          if (doublejump > 1) {
+          if (doublejump >= 1) {
+            addKaboom(player.pos);
             player.jump(JUMP_FORCE / 1.5);
             doublejump = doublejump - 1;
+            jumpMeter.text = doublejump;
           }
         }
       }
@@ -3018,8 +3030,9 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           origin("botright"),
           area(),
           solid(),
-          move(LEFT, SPEED * rand(0.2, 0.8)),
-          color(127, 0, 255)
+          move(LEFT, rand(500, SPEED * rand(0.01, 0.8))),
+          color(127, 0, 255),
+          cleanup()
         ]);
         wait(rand(15, 86), spawnPlatforms);
       }
@@ -3033,7 +3046,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           origin("botleft"),
           color(131, 106, 36),
           move(LEFT, SPEED * 0.2),
-          "tree"
+          "tree",
+          cleanup()
         ]);
         wait(rand(0.8, 1.3), spawnTree);
       }
@@ -3043,11 +3057,12 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           sprite("cloud"),
           area(),
           layer("ui"),
-          scale(rand(0.5, 4.5)),
+          scale(rand(1e-3, 4.5)),
           pos(width(), rand(height() - FLOOR_HEIGHT)),
           origin("botleft"),
-          move(LEFT, SPEED * 0.2 * rand(0.05, 1.5)),
-          "andrew"
+          move(LEFT, SPEED * 0.2 * rand(0.05, 2)),
+          "andrew",
+          cleanup()
         ]);
         wait(rand(0, Math.abs(4 - SPEED * 1e-5)), spawnClouds);
       }
@@ -3061,8 +3076,9 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           outline(4),
           pos(width(), rand(height() - 40, height() - 200)),
           origin("botleft"),
-          move(LEFT, SPEED * rand(0.01, 0.4)),
-          "coin"
+          move(LEFT, rand(700, SPEED * rand(0.01, 0.4))),
+          "coin",
+          cleanup()
         ]);
         wait(rand(10, 30), spawnCoins);
       }
@@ -3075,37 +3091,71 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           outline(4),
           pos(width(), height() - FLOOR_HEIGHT),
           origin("botleft"),
-          move(LEFT, SPEED * 0.05),
-          "tree"
+          move(LEFT, rand(400, SPEED * 0.05)),
+          "tree",
+          cleanup()
         ]);
         wait(rand(10, 34), spawnRocks);
       }
       __name(spawnRocks, "spawnRocks");
-      function hardMode() {
+      function spawnWarps() {
         add([
-          text("Lets make this a little harder..."),
+          sprite("portal"),
+          layer("midground"),
+          area(),
+          scale(1),
+          outline(4),
+          pos(width(), rand(height() - 40, height() - 200)),
+          origin("botleft"),
+          move(LEFT, 400),
+          "warp",
+          cleanup()
+        ]);
+        wait(rand(120, 200), spawnWarps);
+      }
+      __name(spawnWarps, "spawnWarps");
+      function spawnBonusLeaps() {
+        add([
+          sprite("portal2"),
+          layer("midground"),
+          area(),
+          scale(1),
+          outline(4),
+          pos(width(), rand(height() - 40, height() - 200)),
+          origin("botleft"),
+          move(LEFT, rand(400, 1e3)),
+          "bleap",
+          cleanup()
+        ]);
+        wait(rand(45, 60), spawnBonusLeaps);
+      }
+      __name(spawnBonusLeaps, "spawnBonusLeaps");
+      function cloudyMode() {
+        add([
+          text("The air is getting foggy..."),
           origin("center"),
           layer("ui"),
           pos(width() / 2, height() / 2),
           color(255, 0, 0),
-          "hardmodeText"
+          "hardmodeText",
+          lifespan(5, { fade: 1 })
         ]);
-        spawnRocks();
-        spawnCoins();
-        spawnCoins();
         spawnCoins();
         spawnClouds();
         spawnClouds();
         spawnClouds();
-        wait(5, every("hardmodeText", destroy));
+        spawnClouds();
+        spawnClouds();
       }
-      __name(hardMode, "hardMode");
+      __name(cloudyMode, "cloudyMode");
       spawnTree();
       spawnClouds();
       spawnCoins();
-      spawnPlatforms();
-      wait(rand(120, 360), spawnClouds);
+      spawnBonusLeaps();
+      wait(60, spawnWarps);
+      wait(rand(30, 60), spawnPlatforms);
       wait(rand(60, 85), spawnRocks);
+      wait(240, cloudyMode);
       player.onCollide("tree", () => {
         go("lose", score, highscore);
         addKaboom(player.pos);
@@ -3116,13 +3166,23 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         play("score");
         destroy(coin);
       });
+      player.onCollide("warp", (warp) => {
+        SPEED = SPEED - SPEED * 0.5;
+        play("timewarp");
+        destroy(warp);
+      });
+      player.onCollide("bleap", (bleap) => {
+        doublejump = doublejump + 1;
+        jumpMeter.text = doublejump;
+        destroy(bleap);
+      });
       let score = 0;
       const scoreLabel = add([
         text(score),
         pos(100, 24),
         layer("ui")
       ]);
-      add([
+      const scoreUI = add([
         text("Score"),
         layer("ui"),
         pos(100, 4),
@@ -3134,7 +3194,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         pos(300, 24),
         color(0, 0, 0)
       ]);
-      add([
+      const recordUI = add([
         text("Record"),
         layer("ui"),
         pos(300, 4),
@@ -3145,12 +3205,34 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         layer("ui"),
         pos(500, 24)
       ]);
-      add([
+      const attemptUI = add([
         text("Attempt"),
         layer("ui"),
         pos(500, 4),
         scale(0.5)
       ]);
+      const jumpMeter = add([
+        text(doublejump),
+        layer("ui"),
+        pos(700, 24),
+        scale(0.5)
+      ]);
+      const leapLabel = add([
+        text("Leaps"),
+        layer("ui"),
+        pos(700, 4),
+        scale(0.5),
+        "leapLabel",
+        lifespan(4, { fade: 0.5 })
+      ]);
+      if (highscore >= 1e4) {
+        scoreLabel.moveTo(100, 24);
+        scoreUI.moveTo(100, 4);
+        highscoreLabel.moveTo(400, 24);
+        recordUI.moveTo(400, 4);
+        attemptLabel.moveTo(700, 24);
+        attemptUI.moveTo(700, 4);
+      }
       attempts = attempts + 1;
       attemptLabel.text = attempts;
       onUpdate(() => {
@@ -3162,6 +3244,24 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           highscoreLabel.text = highscore;
           highscoreLabel.color = rgb(255, 196, 0);
         }
+        if (doublejump >= 1) {
+          jumpMeter.color = rgb(0, 255, 0);
+        } else {
+          jumpMeter.color = rgb(255, 255, 255);
+        }
+        jumpMeter.moveTo(player.pos, 600);
+        leapLabel.moveTo(player.pos, 300);
+        if (score >= 1e4) {
+          scoreLabel.moveTo(100, 24, 30);
+          scoreUI.moveTo(100, 4, 30);
+          highscoreLabel.moveTo(400, 24, 30);
+          recordUI.moveTo(400, 4, 30);
+          attemptLabel.moveTo(700, 24, 50);
+          attemptUI.moveTo(700, 4, 50);
+        }
+      });
+      onKeyPress("r", () => {
+        go("lose", score, highscore);
       });
     });
     scene("lose", (score, highscore2) => {
@@ -3190,7 +3290,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         topscores.push(score);
       }
       add([
-        text("Click to play again\nScore"),
+        text("Click to play again.\nPress M to return to MENU.\nScore"),
         pos(width() / 2, height() / 3 - 100),
         scale(0.7),
         origin("center")
@@ -3207,7 +3307,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       ]);
       onKeyPress("space", () => go("game"));
       onClick(() => go("game"));
-      onKeyPress("s", () => go("shop"));
+      onKeyPress("m", () => go("menu"));
     });
     go("game");
   }
@@ -3230,7 +3330,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       color(0, 255, 0)
     ]);
     add([
-      text("AVOID obstacles!\nPress SPACE/CLICK to JUMP!\nPress ARROW KEYS to MOVE!\nPress DOWN ARROW while in the air to FAST FALL!\nSpeed increases over time!"),
+      text("AVOID obstacles!\nPress SPACE/CLICK to JUMP! Press again to LEAP!\nPress ARROW KEYS to MOVE!\nPress DOWN ARROW while in the air to FAST FALL!\nSpeed increases over time!\nPress R to give up."),
       origin("center"),
       pos(width() / 2, height() / 2 + 10),
       scale(0.5),
@@ -3254,9 +3354,9 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       "olist"
     ]);
     add([
-      text("made with <3\nvery cool kaboom team 2022"),
+      text("made with <3\nby very cool kaboom team 2022"),
       pos(0, 0),
-      scale(0.2),
+      scale(0.3),
       color(255, 0, 0)
     ]);
     if (height() < 600) {
@@ -3285,7 +3385,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   });
   scene("obstacles", () => {
     add([
-      text("OBSTACLES"),
+      text("OBSTACLES\nPage 1/2"),
       origin("center"),
       pos(width() / 2, height() / 2 - 300),
       scale(1.5),
@@ -3311,7 +3411,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       origin("center")
     ]);
     add([
-      text("COIN\nUncommon obstacle.\nGrab it for 200 points!"),
+      text("COIN\nUncommon item.\nGrab it for 200 points!"),
       origin("center"),
       pos(width() / 2.25, height() / 2 - 100),
       scale(0.3),
@@ -3360,7 +3460,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       color(255, 0, 0)
     ]);
     add([
-      text("Click to return to menu."),
+      text("Click to return to menu.\nPress 1/2 to switch pages."),
       origin("center"),
       pos(width() / 2, height() / 2 + 300),
       scale(1),
@@ -3381,6 +3481,51 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       color(0, 255, 0)
     ]);
     onClick(() => go("menu"));
+    onKeyPress("2", () => go("obstacles2"));
+  });
+  scene("obstacles2", () => {
+    add([
+      text("OBSTACLES\nPage 2/2"),
+      origin("center"),
+      pos(width() / 2, height() / 2 - 300),
+      scale(1.5),
+      color(255, 0, 0)
+    ]);
+    add([
+      sprite("portal"),
+      pos(width() / 5, height() / 2 - 150),
+      scale(1.5),
+      origin("center")
+    ]);
+    add([
+      text("TIME WARP\nRare item.\nA spaital rift moving at a constant speed,\ncollect it to slow down all objects!"),
+      origin("center"),
+      pos(width() / 5, height() / 2 - 100),
+      scale(0.3),
+      color(0, 255, 0)
+    ]);
+    add([
+      sprite("portal2"),
+      origin("center"),
+      scale(3),
+      pos(width() / 1.5, height() / 2 - 150)
+    ]);
+    add([
+      text("LEAP BALL\nUncommon item.\nGrants you an extra leap to use in midair."),
+      origin("center"),
+      pos(width() / 1.5, height() / 2 - 100),
+      scale(0.3),
+      color(0, 255, 0)
+    ]);
+    add([
+      text("Click to return to menu.\nPress 1/2 to switch pages."),
+      origin("center"),
+      pos(width() / 2, height() / 2 + 300),
+      scale(1),
+      color(0, 0, 255)
+    ]);
+    onClick(() => go("menu"));
+    onKeyPress("1", () => go("obstacles"));
   });
   go("menu");
 })();
