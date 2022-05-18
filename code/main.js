@@ -30,6 +30,7 @@ loadSound("score", "sounds/score.mp3")
 loadSound("timewarp", "sounds/timewarp.ogg")
 loadPedit("portal", "sprites/portal.pedit");
 loadPedit("portal2", "sprites/portal2.pedit");
+loadSound("thePentagon", "sounds/pentagon.mp3")
 function startGame()
 {
 // load assets
@@ -55,9 +56,7 @@ loadPedit("ground", "sprites/ground.pedit");
 //loadPedit("andrew", "sprites/andrew.pedit");
 //         loadPedit("bottle", "sprites/bottle.pedit");
 
-
 scene("game", () => {
-
 
   
 layers([
@@ -101,7 +100,7 @@ add([
 	// define gravity
 	gravity(2400);
   let SPEED = 1000
-  doublejump = 0
+  doublejump = 1
 
 	// add a game object to screen
 	const player = add([
@@ -112,8 +111,9 @@ add([
 		area(),
 		body(),
     outview({ hide: true, pause: false}),
+    "pentagon"
 	]);
-
+    onClick("pentagon", (pentagon) => play("thePentagon"))
 	// floor
 	add([
 		rect(width(), FLOOR_HEIGHT),
@@ -122,7 +122,7 @@ add([
 		origin("botleft"),
 		area(),
 		solid(),
-		color(127, 200, 255),
+		color(0, 138, 35),
 	]);
 
    function walkLeft(){
@@ -169,6 +169,7 @@ add([
   }
 
   onKeyPress("down", fall);
+  onKeyPress("s", fall);
 	// jump when user press space
 	onKeyPress("space", jump);
 	onClick(jump);
@@ -180,7 +181,7 @@ add([
 			outline(4),
 			pos(-48, height() - FLOOR_HEIGHT),
 			origin("botleft"),
-			color(131, 106, 36),
+			color(0, 35, 255),
 			//move(LEFT, SPEED*0.5),
 			"tree",
 		]);
@@ -443,7 +444,7 @@ function cloudyMode() {
   }
 	});
 //debug
-//score = 9990
+//score = 9000
 //SPEED = 9998
 onKeyPress("r", () => { go("lose", score, highscore) })
 });
@@ -454,7 +455,10 @@ scene("lose", (score, highscore) => {
 		pos(width() / 2, height() / 3 + 150),
 		scale(2),
 		origin("center"),
+    area(),
+    "pentagon",
 	]);
+    onClick("pentagon", (pentagon) => play("thePentagon"))
 	// display score
 	const finalscoreLabel = add([
 		text(score),
@@ -473,7 +477,6 @@ scene("lose", (score, highscore) => {
         color(255,196,0),
         finalscoreLabel.color = rgb(255, 196, 0),
       ]);
-    topscores.push(score)
     }
   add([
     text("Click to play again.\nPress M to return to MENU.\nScore"),
@@ -481,10 +484,14 @@ scene("lose", (score, highscore) => {
     scale(.7),
     origin("center")
   ])
+  topscores.push(score)
   topscores.sort(function(a, b){return b - a});
+  if (topscores.length > 5) {
+      topscores.pop();
+    }
   add([
 		text("Top scores:\n" + topscores.join("\n")),
-		pos(width() / 2, height() / 2 + 100),
+		pos(width() / 2, height() / 2 + 130),
 		scale(.5),
 		origin("center"),
     color(255,255,255)  
@@ -569,6 +576,7 @@ scene("menu", () => {
   onKeyPress("space", () => startGame());
   onKeyPress("o", () => go("obstacles"));
   onClick("olist", (olist) => go("obstacles"));
+  onClick("pentagon", (pentagon) => play("thePentagon"))
 });
 scene("obstacles", () => {
   add([
@@ -577,12 +585,16 @@ scene("obstacles", () => {
 		scale(1.5),
     color(255, 0, 0)
   ])
+  onClick("pentagon", (pentagon) => play("thePentagon"))
   add([
     sprite("pentagon"),
 		pos(width() / 5, height() / 2 - 150),
 		scale(1.5),
 		origin("center"),
+    area(),
+    "pentagon"
   ])
+  
   add([
 		text("PENTAGON\nIts you!\nThe player character."), origin('center'),
 		pos(width()/ 5, height() /2 - 100),

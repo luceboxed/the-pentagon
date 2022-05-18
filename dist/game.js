@@ -2935,6 +2935,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadSound("timewarp", "sounds/timewarp.ogg");
   loadPedit("portal", "sprites/portal.pedit");
   loadPedit("portal2", "sprites/portal2.pedit");
+  loadSound("thePentagon", "sounds/pentagon.mp3");
   function startGame() {
     loadSprite("bean", "sprites/bean.png");
     loadPedit("pentagon", "sprites/Pentagon.pedit");
@@ -2958,14 +2959,16 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       ]);
       gravity(2400);
       let SPEED = 1e3;
-      doublejump = 0;
+      doublejump = 1;
       const player = add([
         sprite("pentagon"),
         pos(80, 40),
         area(),
         body(),
-        outview({ hide: true, pause: false })
+        outview({ hide: true, pause: false }),
+        "pentagon"
       ]);
+      onClick("pentagon", (pentagon) => play("thePentagon"));
       add([
         rect(width(), FLOOR_HEIGHT),
         outline(4),
@@ -2973,7 +2976,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         origin("botleft"),
         area(),
         solid(),
-        color(127, 200, 255)
+        color(0, 138, 35)
       ]);
       function walkLeft() {
         player.move(-500, 0);
@@ -3011,6 +3014,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
       __name(fall, "fall");
       onKeyPress("down", fall);
+      onKeyPress("s", fall);
       onKeyPress("space", jump);
       onClick(jump);
       add([
@@ -3019,7 +3023,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         outline(4),
         pos(-48, height() - FLOOR_HEIGHT),
         origin("botleft"),
-        color(131, 106, 36),
+        color(0, 35, 255),
         "tree"
       ]);
       function spawnPlatforms() {
@@ -3269,8 +3273,11 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         sprite("pentagon"),
         pos(width() / 2, height() / 3 + 150),
         scale(2),
-        origin("center")
+        origin("center"),
+        area(),
+        "pentagon"
       ]);
+      onClick("pentagon", (pentagon) => play("thePentagon"));
       const finalscoreLabel = add([
         text(score),
         pos(width() / 2, height() / 3 + 80),
@@ -3287,7 +3294,6 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           color(255, 196, 0),
           finalscoreLabel.color = rgb(255, 196, 0)
         ]);
-        topscores.push(score);
       }
       add([
         text("Click to play again.\nPress M to return to MENU.\nScore"),
@@ -3295,12 +3301,16 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         scale(0.7),
         origin("center")
       ]);
+      topscores.push(score);
       topscores.sort(function(a2, b2) {
         return b2 - a2;
       });
+      if (topscores.length > 5) {
+        topscores.pop();
+      }
       add([
         text("Top scores:\n" + topscores.join("\n")),
-        pos(width() / 2, height() / 2 + 100),
+        pos(width() / 2, height() / 2 + 130),
         scale(0.5),
         origin("center"),
         color(255, 255, 255)
@@ -3382,6 +3392,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     onKeyPress("space", () => startGame());
     onKeyPress("o", () => go("obstacles"));
     onClick("olist", (olist) => go("obstacles"));
+    onClick("pentagon", (pentagon) => play("thePentagon"));
   });
   scene("obstacles", () => {
     add([
@@ -3391,11 +3402,14 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       scale(1.5),
       color(255, 0, 0)
     ]);
+    onClick("pentagon", (pentagon) => play("thePentagon"));
     add([
       sprite("pentagon"),
       pos(width() / 5, height() / 2 - 150),
       scale(1.5),
-      origin("center")
+      origin("center"),
+      area(),
+      "pentagon"
     ]);
     add([
       text("PENTAGON\nIts you!\nThe player character."),
