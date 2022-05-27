@@ -444,8 +444,8 @@ function cloudyMode() {
   }
 	});
 //debug
-//score = 9000
-//SPEED = 9998
+//score = 99999
+//SPEED = 50999
 onKeyPress("r", () => { go("lose", score, highscore) })
 });
 
@@ -597,6 +597,7 @@ scene("obstacles", () => {
   
   add([
 		text("PENTAGON\nIts you!\nThe player character."), origin('center'),
+    onClick("pentagon", (pentagon) => play("thePentagon")),
 		pos(width()/ 5, height() /2 - 100),
 		scale(.3),
     color(0, 255, 0)

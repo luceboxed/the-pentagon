@@ -3414,6 +3414,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     add([
       text("PENTAGON\nIts you!\nThe player character."),
       origin("center"),
+      onClick("pentagon", (pentagon) => play("thePentagon")),
       pos(width() / 5, height() / 2 - 100),
       scale(0.3),
       color(0, 255, 0)
